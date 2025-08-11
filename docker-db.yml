@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  db:
+    platform: linux/amd64    # Use ARM64 variant on Apple Silicon
+    image: postgis/postgis:17-3.5
+    container_name: sanayi-db
+    environment:
+      POSTGRES_DB: sanayi
+      POSTGRES_USER: sanayi_user
+      POSTGRES_PASSWORD: furkan
+    ports:
+      - "25432:5432"
+    volumes:
+      - sanayi-data:/var/lib/postgresql/data
+
+volumes:
+  sanayi-data: {}
