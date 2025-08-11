@@ -2,32 +2,56 @@ package com.furkan.sanayi.service
 
 import com.furkan.sanayi.domain.Rating
 import com.furkan.sanayi.domain.User
-import com.furkan.sanayi.dto.ProviderListItem
-import com.furkan.sanayi.dto.RatingRequest
+import com.furkan.sanayi.dto.*
 import com.furkan.sanayi.repository.ProviderRepository
 import com.furkan.sanayi.repository.RatingRepository
-import jakarta.transaction.Transactional
+import org.locationtech.jts.geom.Point
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ProviderService(
     private val providerRepo: ProviderRepository,
     private val ratingRepo: RatingRepository
 ) {
-    fun list(
+    @Transactional(readOnly = true)
+    fun listProviders(
         categoryId: Int?,
         city: String?,
         district: String?,
         brandId: Int?,
         page: Pageable
     ): Page<ProviderListItem> {
-        return providerRepo.search(categoryId, city, district, brandId, page)
+        return providerRepo.search(categoryId, city ?: "Ankara", district, brandId, page)
     }
 
-    @Transactional
-    fun rate(dto: RatingRequest): Int {
+    @Transactional(readOnly = true)
+    fun getProviderDetail(id: Int): ProviderDetailDto {
+        val p = providerRepo.findWithGraphById(id) ?: throw NoSuchElementException("Usta bulunamadi: $id")
+
+        return ProviderDetailDto(
+            id = p.id!!,
+            name = p.name,
+            address = p.address,
+            city = p.city,
+            district = p.district,
+            phone = p.phone,
+            location = p.location?.toDto(),
+            avgScore = p.avgScore,
+            ratingCount = p.ratingCount,
+            brands = p.brands.map { IdNameDto(it.id!!, it.name) }.sortedBy { it.name },
+            categories = p.categories.map { IdNameDto(it.id!!, it.name) }.sortedBy { it.name }
+        )
+    }
+
+    @Transactional(readOnly = true)
+    fun listRatings(providerId: Int, pageable: Pageable): Page<RatingDto> =
+        ratingRepo.findAllByProviderId(providerId, pageable)
+
+    @Transactional(readOnly = true)
+    fun rate(dto: RatingRequest): IdResponse {
         dto.ensureIdentityValid()
 
         //tekil oy kontrolu (DB index'leri zaten garanti veriyor; burada kullaniciya iyi mesaj verelim
@@ -50,6 +74,8 @@ class ProviderService(
                 ipAddress = dto.ip
             )
         )
-        return saved.id!!
+        return IdResponse(saved.id!!)
     }
+
+    private fun Point.toDto(): LocationDto = LocationDto(lon = this.x, lat = this.y)
 }

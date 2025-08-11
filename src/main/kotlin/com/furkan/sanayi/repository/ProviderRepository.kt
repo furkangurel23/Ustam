@@ -4,14 +4,15 @@ import com.furkan.sanayi.domain.Provider
 import com.furkan.sanayi.dto.ProviderListItem
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 
 interface ProviderRepository : JpaRepository<Provider, Int> {
 
-    fun findAllByCityIgnoreCaseAndDistrictIgnoreCase(city: String, district: String): List<Provider>
-
+    @EntityGraph(attributePaths = ["brand", "categories"])
+    fun findWithGraphById(id: Int): Provider?
     @Query(
         """
         select new com.furkan.sanayi.dto.ProviderListItem(

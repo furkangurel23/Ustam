@@ -1,16 +1,12 @@
 package com.furkan.sanayi.controller
 
+import com.furkan.sanayi.dto.IdResponse
 import com.furkan.sanayi.dto.RatingRequest
 import com.furkan.sanayi.service.ProviderService
 import jakarta.validation.Valid
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
-import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api")
@@ -23,12 +19,16 @@ class ProviderController(
         @RequestParam(required = false) city: String?,
         @RequestParam(required = false) district: String?,
         @RequestParam(required = false) brandId: Int?,
-        pageable: Pageable
-    ) = providerService.list(categoryId, city, district, brandId, pageable)
+        @ParameterObject pageable: Pageable
+    ) = providerService.listProviders(categoryId, city, district, brandId, pageable)
 
-    @PostMapping("/ratigs")
-    fun rate(@RequestBody @Valid body: RatingRequest): ResponseEntity<Map<String, Any>> {
-        val id = providerService.rate(body)
-        return ResponseEntity.ok(mapOf("id" to id, "status" to "ok"))
-    }
+    @GetMapping("/providers/{id}")
+    fun detail(@PathVariable id: Int) = providerService.getProviderDetail(id)
+
+    @GetMapping("/providers/{id}/ratings")
+    fun ratings(@PathVariable id: Int, @ParameterObject pageable: Pageable) = providerService.listRatings(id, pageable)
+
+    @PostMapping("/ratings")
+    fun rate(@RequestBody @Valid body: RatingRequest): IdResponse = providerService.rate(body)
+
 }
