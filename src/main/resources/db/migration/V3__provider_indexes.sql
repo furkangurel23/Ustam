@@ -2,10 +2,6 @@ CREATE INDEX IF NOT EXISTS idx_providers_city_district ON providers (lower(city)
 CREATE INDEX IF NOT EXISTS idx_provider_categories ON provider_categories (category_id, provider_id);
 CREATE INDEX IF NOT EXISTS idx_provider_brands ON provider_brands (brand_id, provider_id);
 
-ALTER TABLE providers
-    ADD COLUMN IF NOT EXISTS rating_count INT NOT NULL DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS rating_sum   INT NOT NULL DEFAULT 0;
-
 -- 1) Kolonlar
 ALTER TABLE providers
     ADD COLUMN IF NOT EXISTS rating_count INT NOT NULL DEFAULT 0,
