@@ -50,7 +50,7 @@ class ProviderService(
     fun listRatings(providerId: Int, pageable: Pageable): Page<RatingDto> =
         ratingRepo.findAllByProviderId(providerId, pageable)
 
-    @Transactional(readOnly = true)
+    @Transactional
     fun rate(dto: RatingRequest): IdResponse {
         dto.ensureIdentityValid()
 

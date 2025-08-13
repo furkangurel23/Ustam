@@ -1,0 +1,25 @@
+# Liste (Ankara/Yenimahalle gibi filtrelerle)
+curl "http://localhost:8080/api/providers?city=Ankara&district=Yenimahalle&page=0&size=10"
+
+# Detay
+curl "http://localhost:8080/api/providers/1"
+
+# Ratings
+curl "http://localhost:8080/api/providers/1/ratings?page=0&size=10"
+
+# Oy verme (kayıtlı kullanıcı)
+curl -X POST "http://localhost:8080/api/ratings" -H "Content-Type: application/json" -d '{
+  "providerId": 1,
+  "score": 5,
+  "comment": "Çok iyi",
+  "userId": 1,
+  "ip": "1.2.3.4"
+}'
+
+# Oy verme (anonim – unique constraint: provider + anonymous_id)
+curl -X POST "http://localhost:8080/api/ratings" -H "Content-Type: application/json" -d '{
+  "providerId": 1,
+  "score": 3,
+  "anonymousId": "anon-xyz",
+  "ip": "2.3.4.5"
+}'

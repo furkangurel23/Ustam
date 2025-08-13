@@ -11,22 +11,24 @@ import org.springframework.data.repository.query.Param
 
 interface ProviderRepository : JpaRepository<Provider, Int> {
 
-    @EntityGraph(attributePaths = ["brand", "categories"])
+    @EntityGraph(attributePaths = ["brands", "categories"])
     fun findWithGraphById(id: Int): Provider?
+
     @Query(
         """
-        select new com.furkan.sanayi.dto.ProviderListItem(
-            p.id, p.name, p.city, p.district, p.phone,
-            p.avgScore, p.ratingCount
-        )
-        from Provider p
-        left join p.categories c
-        left join p.brands b
-        where lower(p.city) = lower(coalesce(:city, 'Ankara'))
-          and (:district is null or lower(p.district) = lower(:district))
-          and (:categoryId is null or c.id = :categoryId)
-          and (:brandId is null or b.id = :brandId)
-        group by p.id, p.name, p.city, p.district, p.phone, p.avgScore, p.ratingCount
+            select new com.furkan.sanayi.dto.ProviderListItem(
+                p.id, p.name, p.city, p.district, p.phone,
+                p.avgScore, p.ratingCount
+            )
+            from Provider p
+            where lower(p.city) = lower(coalesce(:city, 'Ankara'))
+              and (:district is null or lower(p.district) = lower(:district))
+              and (:categoryId is null or exists (
+                    select 1 from p.categories c where c.id = :categoryId
+              ))
+              and (:brandId is null or exists (
+                    select 1 from p.brands b where b.id = :brandId
+              ))
         """
     )
     fun search(

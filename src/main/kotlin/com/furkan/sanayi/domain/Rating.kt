@@ -3,6 +3,7 @@ package com.furkan.sanayi.domain
 import jakarta.persistence.*
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
+import org.hibernate.annotations.ColumnTransformer
 import org.hibernate.annotations.CreationTimestamp
 import java.time.Instant
 
@@ -34,6 +35,7 @@ class Rating(
     var anonymousId: String? = null,
 
     @Column(name = "ip_address", columnDefinition = "inet")
+    @ColumnTransformer(write = "?::inet")
     var ipAddress: String? = null,
 
     @CreationTimestamp

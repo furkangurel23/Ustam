@@ -18,6 +18,7 @@ class GlobalExceptionHandler {
                     "details" to ex.bindingResult.fieldErrors.map { it.field to it.defaultMessage })
             )
 
+    @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArg(ex: IllegalArgumentException) =
         ResponseEntity.badRequest().body(mapOf("error" to ex.message))
 }

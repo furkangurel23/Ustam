@@ -23,7 +23,10 @@ interface RatingRepository : JpaRepository<Rating, Int> {
         left join r.user u
         where r.provider.id = :providerId
         order by r.createdAt desc
-    """)
+    """,
+        countQuery = """
+            select count(r) from Rating r where r.provider.id = :providerId
+        """)
     fun findAllByProviderId(@Param("providerId") providerId: Int, pageable: Pageable): Page<RatingDto>
     fun existsByProviderIdAndUserId(providerId: Int, userId: Long): Boolean
     fun existsByProviderIdAndAnonymousId(providerId: Int, anonymousId: String): Boolean
