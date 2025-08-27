@@ -19,8 +19,8 @@ class MetaController(
 ) {
     @GetMapping("/categories")
     fun listCategories(@ParameterObject pageable: Pageable): Page<Category> =
-        categoryRepository.findAllByOrderByNameAsc(pageable)
+        categoryRepository.findAll(pageable)
 
     @GetMapping("/brands")
-    fun listBrands(@ParameterObject pageable: Pageable): Page<Brand> = brandRepository.findAllByOrderByNameAsc(pageable)
+    fun listBrands(@ParameterObject pageable: Pageable): Page<Brand> = brandRepository.findAll(pageable)
 }

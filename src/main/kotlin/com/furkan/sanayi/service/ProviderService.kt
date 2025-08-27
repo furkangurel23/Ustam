@@ -29,7 +29,7 @@ class ProviderService(
         req.ensureValid()
         return providerRepo.search(
             categoryId = req.categoryId,
-            city = req.city ?: "Ankara",
+            city = req.city,
             district = req.district,
             brandId = req.brandId,
             minScore = req.minScore,

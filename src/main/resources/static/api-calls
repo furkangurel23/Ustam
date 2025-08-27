@@ -1,25 +1,92 @@
-# Liste (Ankara/Yenimahalle gibi filtrelerle)
-curl "http://localhost:8080/api/providers?city=Ankara&district=Yenimahalle&page=0&size=10"
+# ===== Sanayi API Quick Test Suite =====
+# Kullanım:
+#   export API="http://localhost:8080"
+#   export PID="1"       # mevcut provider id (listeden bak)
+#   export CAT="1"       # mevcut category id
+#   export BRAND="1"     # mevcut brand id
+#   export USER="1"      # mevcut user id (kayıtlı kullanıcı ile rating deneyeceksen)
+#
+# Notlar:
+# - Pageable sort formatı: ?sort=<field>,<asc|desc>
+#   Uygun alanlar: name | city | district | avgScore | ratingCount
 
-# Detay
-curl "http://localhost:8080/api/providers/1"
+# ---------- META ----------
 
-# Ratings
-curl "http://localhost:8080/api/providers/1/ratings?page=0&size=10"
+# Categories (paged)
+curl "$API/api/categories?page=0&size=10&sort=name,asc"
 
-# Oy verme (kayıtlı kullanıcı)
-curl -X POST "http://localhost:8080/api/ratings" -H "Content-Type: application/json" -d '{
-  "providerId": 1,
-  "score": 5,
-  "comment": "Çok iyi",
-  "userId": 1,
+# Brands (paged)
+curl "$API/api/brands?page=0&size=10&sort=name,asc"
+
+
+# ---------- PROVIDERS: SEARCH/LIST ----------
+
+# En iyi puanlılar (global)
+curl "$API/api/providers?sort=avgScore,desc&page=0&size=10"
+
+# En kötü puanlılar (global)
+curl "$API/api/providers?sort=avgScore,asc&page=0&size=10"
+
+# En çok oy alanlar (global)
+curl "$API/api/providers?sort=ratingCount,desc&page=0&size=10"
+
+# City + District filtre (isim artan)
+curl "$API/api/providers?city=Ankara&district=Yenimahalle&sort=name,asc&page=0&size=10"
+
+# Category filtre
+curl "$API/api/providers?categoryId=$CAT&sort=avgScore,desc&page=0&size=10"
+
+# Brand filtre
+curl "$API/api/providers?brandId=$BRAND&sort=avgScore,desc&page=0&size=10"
+
+# Skor aralığı (min/max)
+curl "$API/api/providers?minScore=2&maxScore=5&sort=avgScore,desc&page=0&size=10"
+
+
+# ---------- PROVIDER: DETAIL ----------
+
+# Provider detail
+curl "$API/api/providers/$PID"
+
+
+# ---------- PROVIDER: RATINGS LIST ----------
+
+# Belirli provider'ın rating'leri (paged)
+curl "$API/api/providers/$PID/ratings?page=0&size=10"
+
+
+# ---------- RATINGS: CREATE ----------
+
+# Kayıtlı kullanıcı olarak rating oluştur
+curl -X POST "$API/api/ratings/rate" -H "Content-Type: application/json" -d '{
+  "providerId": '"$PID"',
+  "score": 4,
+  "comment": "Hızlı ve ilgili",
+  "userId": '"$USER"',
   "ip": "1.2.3.4"
 }'
 
-# Oy verme (anonim – unique constraint: provider + anonymous_id)
-curl -X POST "http://localhost:8080/api/ratings" -H "Content-Type: application/json" -d '{
-  "providerId": 1,
+# Anonim kullanıcı olarak rating oluştur
+curl -X POST "$API/api/ratings/rate" -H "Content-Type: application/json" -d '{
+  "providerId": '"$PID"',
   "score": 3,
-  "anonymousId": "anon-xyz",
+  "comment": "İdare eder",
+  "anonymousId": "anon-xyz-001",
   "ip": "2.3.4.5"
+}'
+
+
+# ---------- PROVIDERS: CREATE ----------
+
+# Yeni provider oluştur (en az bir categoryId gerekli)
+curl -X POST "$API/api/providers" -H "Content-Type: application/json" -d '{
+  "name": "Deneme Usta",
+  "city": "Ankara",
+  "district": "Çankaya",
+  "address": "Konya Yolu Blv. 8",
+  "phone": "+90 312 000 0000",
+  "lat": 39.8865,
+  "lon": 32.7306,
+  "categoryIds": ['"$CAT"'],
+  "brandIds": ['"$BRAND"']
 }'
