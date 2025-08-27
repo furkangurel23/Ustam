@@ -1,5 +1,6 @@
 package com.furkan.sanayi.domain
 
+import com.furkan.sanayi.dto.ProviderMiniDto
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
@@ -67,4 +68,16 @@ class Provider(
 
     @Column(name = "avg_score", insertable = false, updatable = false)
     var avgScore: BigDecimal? = null
-)
+) {
+    fun toMiniDto(): ProviderMiniDto =
+        ProviderMiniDto(
+            id = this.id!!,
+            name = this.name,
+            address = this.address,
+            city = this.city,
+            district = this.district,
+            phone = this.phone,
+            lat = this.location?.y, // JTS: y=lat
+            lng = this.location?.x  // JTS: x=lng
+        )
+}

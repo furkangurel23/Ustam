@@ -90,3 +90,7 @@ curl -X POST "$API/api/providers" -H "Content-Type: application/json" -d '{
   "categoryIds": ['"$CAT"'],
   "brandIds": ['"$BRAND"']
 }'
+
+# ---------- PROVIDERS: NEARBY (yakın arama) ----------
+# Konum: (39.93, 32.85) Ankara civarı, 10 km yarıçap
+curl "$API/api/providers/near?lat=39.93&lon=32.85&radiusKm=10&page=0&size=10"

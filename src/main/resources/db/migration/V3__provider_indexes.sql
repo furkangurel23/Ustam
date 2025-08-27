@@ -103,3 +103,6 @@ EXECUTE FUNCTION ratings_after_delete();
 
 -- 5) Yardımcı index (zaten vardır ama garanti edelim)
 CREATE INDEX IF NOT EXISTS idx_ratings_provider ON ratings (provider_id);
+
+-- Hızlı coğrafi arama/sort için GIST index
+CREATE INDEX IF NOT EXISTS idx_providers_location_gist ON providers USING GIST (location);

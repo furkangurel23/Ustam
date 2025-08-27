@@ -1,5 +1,7 @@
 package com.furkan.sanayi.domain
 
+import com.furkan.sanayi.dto.BrandDto
+import com.furkan.sanayi.dto.ProviderMiniDto
 import jakarta.persistence.*
 
 @Entity
@@ -14,4 +16,12 @@ class Brand(
 
     @ManyToMany(mappedBy = "brands")
     var providers: MutableSet<Provider> = linkedSetOf()
-)
+) {
+
+    fun toDto(providers: List<ProviderMiniDto>): BrandDto =
+        BrandDto(
+            id = this.id!!,
+            name = this.name,
+            providers = providers
+        )
+}

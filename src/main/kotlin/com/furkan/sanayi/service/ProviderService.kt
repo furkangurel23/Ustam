@@ -10,6 +10,7 @@ import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -93,6 +94,26 @@ class ProviderService(
         val saved = providerRepo.save(p)
         return ProviderCreateResponse(id = saved.id!!, name = saved.name)
 
+    }
+
+    @Transactional(readOnly = true)
+    fun nearby(lat: Double, lon: Double, radiusKm: Double, pageable: Pageable): Page<ProviderNearItem> {
+        if (radiusKm <= 0.0 || radiusKm > 100.0) {
+            throw InvalidRequestException("radiusKm 0-100 arasında olmalıdır.")
+        }
+        val page = providerRepo.findNearby(lat, lon, radiusKm, pageable)
+        val items = page.content.map { row ->
+            ProviderNearItem(
+                id = (row[0] as Number).toInt(),
+                name = row[1] as String,
+                city = row[2] as String?,
+                district = row[3] as String?,
+                avgScore = (row[4] as? Number)?.toDouble(),
+                ratingCount = (row[5] as? Number)?.toLong(),
+                distanceKm = (row[6] as Number).toDouble()
+            )
+        }
+        return PageImpl(items, pageable, page.totalElements)
     }
 
     private fun Point.toDto(): LocationDto = LocationDto(lon = this.x, lat = this.y)
