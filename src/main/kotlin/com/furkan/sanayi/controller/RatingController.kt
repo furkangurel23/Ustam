@@ -11,15 +11,15 @@ import org.springframework.data.domain.Pageable
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/rating")
+@RequestMapping("/api")
 class RatingController(
     private val ratingService: RatingService
 ) {
 
-    @GetMapping("/provider/{id}")
+    @GetMapping("/providers/{id}/ratings")
     fun ratings(@PathVariable id: Int, @ParameterObject pageable: Pageable): Page<RatingDto> =
         ratingService.listRatings(id, pageable)
 
-    @PostMapping("/rate")
+    @PostMapping("/ratings/rate")
     fun rate(@RequestBody @Valid body: RatingRequest): IdResponse = ratingService.addRating(body)
 }

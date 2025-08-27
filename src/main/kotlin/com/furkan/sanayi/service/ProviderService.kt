@@ -1,5 +1,6 @@
 package com.furkan.sanayi.service
 
+import com.furkan.sanayi.common.exceptions.InvalidRequestException
 import com.furkan.sanayi.domain.Provider
 import com.furkan.sanayi.dto.*
 import com.furkan.sanayi.repository.BrandRepository
@@ -22,13 +23,19 @@ class ProviderService(
 ) {
     @Transactional(readOnly = true)
     fun listProviders(
-        categoryId: Int?,
-        city: String?,
-        district: String?,
-        brandId: Int?,
+        req: ProviderSearchRequest,
         page: Pageable
     ): Page<ProviderListItem> {
-        return providerRepo.search(categoryId, city ?: "Ankara", district, brandId, page)
+        req.ensureValid()
+        return providerRepo.search(
+            categoryId = req.categoryId,
+            city = req.city ?: "Ankara",
+            district = req.district,
+            brandId = req.brandId,
+            minScore = req.minScore,
+            maxScore = req.maxScore,
+            pageable = page
+        )
     }
 
     @Transactional(readOnly = true)
@@ -52,14 +59,20 @@ class ProviderService(
 
     @Transactional
     fun create(req: ProviderCreateRequest): ProviderCreateResponse {
+        req.ensureValid()
+        // 1) Kategori/marka doğrulama (mevcut olmayan id'leri bul)
         val categories = if (req.categoryIds.isNotEmpty())
             categoryRepo.findAllById(req.categoryIds).toSet() else emptySet()
-        if (categories.size != req.categoryIds.size)
-            error("Geçersiz caegoryIds tespit edildi.")
+        val missingCats = req.categoryIds - categories.map { it.id!! }.toSet()
+        if (missingCats.isNotEmpty())
+            throw InvalidRequestException("Geçersiz kategori ID(ler): ${missingCats.joinToString(",")}")
+
         val brands = if (req.brandIds.isNotEmpty())
             brandRepo.findAllById(req.brandIds).toSet() else emptySet()
-        if (brands.size != req.brandIds.size)
-            error("Geçersiz brandIds tespit edildi.")
+        val missingBrands = req.brandIds - brands.map { it.id!! }.toSet()
+        if (missingBrands.isNotEmpty())
+            throw InvalidRequestException("Geçersiz marka ID(ler): ${missingBrands.joinToString(",")}")
+
 
         //Location (lon, lat) -> JTS Point(SRID 4326)
 

@@ -29,6 +29,8 @@ interface ProviderRepository : JpaRepository<Provider, Int> {
               and (:brandId is null or exists (
                     select 1 from p.brands b where b.id = :brandId
               ))
+              and (:minScore is null or p.avgScore > :minScore)
+              and (:maxScore is null or p.avgScore < :maxScore) 
         """
     )
     fun search(
@@ -36,6 +38,8 @@ interface ProviderRepository : JpaRepository<Provider, Int> {
         @Param("city") city: String?,
         @Param("district") district: String?,
         @Param("brandId") brandId: Int?,
+        @Param("minScore") minScore: Double?,
+        @Param("maxScore") maxScore: Double?,
         pageable: Pageable
     ): Page<ProviderListItem>
 

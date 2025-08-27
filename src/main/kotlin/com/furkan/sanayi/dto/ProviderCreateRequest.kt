@@ -1,5 +1,6 @@
 package com.furkan.sanayi.dto
 
+import com.furkan.sanayi.common.exceptions.InvalidRequestException
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.*
 
@@ -36,4 +37,9 @@ data class ProviderCreateRequest(
 
     @Schema(example = "[3,4]")
     val brandIds: Set<Int> = emptySet()
-)
+) {
+    fun ensureValid() {
+        if (categoryIds.isEmpty())
+            throw InvalidRequestException("En az bir kategori seçilmelidir.")
+    }
+}

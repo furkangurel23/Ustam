@@ -1,5 +1,6 @@
 package com.furkan.sanayi.service
 
+import com.furkan.sanayi.common.exceptions.InvalidRequestException
 import com.furkan.sanayi.domain.Rating
 import com.furkan.sanayi.domain.User
 import com.furkan.sanayi.dto.IdResponse
@@ -28,11 +29,12 @@ class RatingService(
 
         //tekil oy kontrolu (DB index'leri zaten garanti veriyor; burada kullaniciya iyi mesaj verelim
         if (dto.userId != null && ratingRepo.existsByProviderIdAndUserId(dto.providerId, dto.userId)) {
-            error("Bu kullanıcı bu ustayı zaten oylamış.")
+            throw InvalidRequestException("Bu sağlayıcıyı zaten oyladınız. (kullanıcı)")
         }
         if (dto.anonymousId != null && ratingRepo.existsByProviderIdAndAnonymousId(dto.providerId, dto.anonymousId)) {
-            error("Bu anonim kimlik bu ustayı zaten oylamış.")
+            throw InvalidRequestException("Bu sağlayıcıyı zaten oyladınız. (anonim)")
         }
+
 
         val provider = providerRepo.findById(dto.providerId)
             .orElseThrow { IllegalStateException("Usta bulunamadı: ${dto.providerId}") }
