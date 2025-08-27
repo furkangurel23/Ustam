@@ -15,7 +15,7 @@ data class RatingRequest(
 ) {
     fun ensureIdentityValid() {
         require((userId != null) xor (anonymousId != null)) {
-            "Either userId or anonymousId must be provided (exclusively).¬"
+            "Either userId or anonymousId must be provided (exclusively)."
         }
     }
 }

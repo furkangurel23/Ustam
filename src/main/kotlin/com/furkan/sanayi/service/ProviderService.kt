@@ -1,10 +1,12 @@
 package com.furkan.sanayi.service
 
-import com.furkan.sanayi.domain.Rating
-import com.furkan.sanayi.domain.User
+import com.furkan.sanayi.domain.Provider
 import com.furkan.sanayi.dto.*
+import com.furkan.sanayi.repository.BrandRepository
+import com.furkan.sanayi.repository.CategoryRepository
 import com.furkan.sanayi.repository.ProviderRepository
-import com.furkan.sanayi.repository.RatingRepository
+import org.locationtech.jts.geom.Coordinate
+import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -14,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ProviderService(
     private val providerRepo: ProviderRepository,
-    private val ratingRepo: RatingRepository
+    private val categoryRepo: CategoryRepository,
+    private val brandRepo: BrandRepository,
+    private val geometryFactory: GeometryFactory
 ) {
     @Transactional(readOnly = true)
     fun listProviders(
@@ -46,35 +50,36 @@ class ProviderService(
         )
     }
 
-    @Transactional(readOnly = true)
-    fun listRatings(providerId: Int, pageable: Pageable): Page<RatingDto> =
-        ratingRepo.findAllByProviderId(providerId, pageable)
-
     @Transactional
-    fun rate(dto: RatingRequest): IdResponse {
-        dto.ensureIdentityValid()
+    fun create(req: ProviderCreateRequest): ProviderCreateResponse {
+        val categories = if (req.categoryIds.isNotEmpty())
+            categoryRepo.findAllById(req.categoryIds).toSet() else emptySet()
+        if (categories.size != req.categoryIds.size)
+            error("Geçersiz caegoryIds tespit edildi.")
+        val brands = if (req.brandIds.isNotEmpty())
+            brandRepo.findAllById(req.brandIds).toSet() else emptySet()
+        if (brands.size != req.brandIds.size)
+            error("Geçersiz brandIds tespit edildi.")
 
-        //tekil oy kontrolu (DB index'leri zaten garanti veriyor; burada kullaniciya iyi mesaj verelim
-        if (dto.userId != null && ratingRepo.existsByProviderIdAndUserId(dto.providerId, dto.userId)) {
-            error("Bu kullanıcı bu ustayı zaten oylamış.")
-        }
-        if (dto.anonymousId != null && ratingRepo.existsByProviderIdAndAnonymousId(dto.providerId, dto.anonymousId)) {
-            error("Bu anonim kimlik bu ustayı zaten oylamış.")
+        //Location (lon, lat) -> JTS Point(SRID 4326)
+
+        val point = geometryFactory.createPoint(Coordinate(req.lon, req.lat))
+        point.srid = 4326
+
+        val p = Provider().apply {
+            name = req.name
+            city = req.city
+            district = req.district
+            address = req.address
+            phone = req.phone
+            location = point
+            categories.forEach { this.categories.add(it) }
+            brands.forEach { this.brands.add(it) }
         }
 
-        val provider = providerRepo.findById(dto.providerId)
-            .orElseThrow { IllegalStateException("Usta bulunamadı: ${dto.providerId}") }
-        val saved = ratingRepo.save(
-            Rating(
-                provider = provider,
-                score = dto.score,
-                commentText = dto.comment,
-                user = dto.userId?.let { User(it) },
-                anonymousId = dto.anonymousId,
-                ipAddress = dto.ip
-            )
-        )
-        return IdResponse(saved.id!!)
+        val saved = providerRepo.save(p)
+        return ProviderCreateResponse(id = saved.id!!, name = saved.name)
+
     }
 
     private fun Point.toDto(): LocationDto = LocationDto(lon = this.x, lat = this.y)

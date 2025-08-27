@@ -1,8 +1,11 @@
 package com.furkan.sanayi.controller
 
+import com.furkan.sanayi.domain.Brand
+import com.furkan.sanayi.domain.Category
 import com.furkan.sanayi.repository.BrandRepository
 import com.furkan.sanayi.repository.CategoryRepository
 import org.springdoc.core.annotations.ParameterObject
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -15,8 +18,9 @@ class MetaController(
     private val brandRepository: BrandRepository
 ) {
     @GetMapping("/categories")
-    fun listCategories(@ParameterObject pageable: Pageable) = categoryRepository.findAllByOrderByNameAsc(pageable)
+    fun listCategories(@ParameterObject pageable: Pageable): Page<Category> =
+        categoryRepository.findAllByOrderByNameAsc(pageable)
 
     @GetMapping("/brands")
-    fun listBrands(@ParameterObject pageable: Pageable) = brandRepository.findAllByOrderByNameAsc(pageable)
+    fun listBrands(@ParameterObject pageable: Pageable): Page<Brand> = brandRepository.findAllByOrderByNameAsc(pageable)
 }
