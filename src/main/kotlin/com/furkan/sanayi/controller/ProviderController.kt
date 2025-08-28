@@ -1,6 +1,9 @@
 package com.furkan.sanayi.controller
 
-import com.furkan.sanayi.dto.*
+import com.furkan.sanayi.dto.ProviderDetailDto
+import com.furkan.sanayi.dto.ProviderListItem
+import com.furkan.sanayi.dto.ProviderNearItem
+import com.furkan.sanayi.dto.ProviderSearchRequest
 import com.furkan.sanayi.service.ProviderService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -10,7 +13,6 @@ import jakarta.validation.constraints.DecimalMin
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -26,11 +28,6 @@ class ProviderController(
 
     @GetMapping("/{id}")
     fun detail(@PathVariable id: Int): ProviderDetailDto = providerService.getProviderDetail(id)
-
-    @Operation(summary = "Yeni servis sağlayıcı ekle")
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    fun create(@Valid @RequestBody req: ProviderCreateRequest): ProviderCreateResponse = providerService.create(req)
 
     @Operation(summary = "onuma göre yakın servis sağlayıcıları listele")
     @GetMapping("/near")

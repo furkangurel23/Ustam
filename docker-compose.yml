@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  db:
+    platform: linux/amd64    # Use ARM64 variant on Apple Silicon
+    image: postgis/postgis:17-3.5
+    container_name: sanayi-db
+    environment:
+      POSTGRES_DB: sanayi
+      POSTGRES_USER: sanayi_user
+      POSTGRES_PASSWORD: furkan
+    ports:
+      - "25432:5432"
+    volumes:
+      - sanayi-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sanayi_user -d sanayi"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    container_name: sanayi-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Container içinden 'localhost' değil 'db' servisine bağlanmalıyız:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sanayi
+      SPRING_DATASOURCE_USERNAME: sanayi_user
+      SPRING_DATASOURCE_PASSWORD: furkan
+
+      # (Opsiyonel) Profil/ayar override'ları:
+      # SPRING_PROFILES_ACTIVE: docker
+      # JAVA_OPTS: "-Xms256m -Xmx512m"
+    ports:
+      - "8080:8080"
+    # (Opsiyonel) app'i hot-reload için local build yerine 'mvn spring-boot:run' ile çalıştırmak istersen ayrı dev compose yazabiliriz.
+
+volumes:
+  sanayi-data: {}

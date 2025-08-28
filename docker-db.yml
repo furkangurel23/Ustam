@@ -13,6 +13,10 @@ services:
       - "25432:5432"
     volumes:
       - sanayi-data:/var/lib/postgresql/data
-
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U sanayi_user -d sanayi" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 volumes:
   sanayi-data: {}

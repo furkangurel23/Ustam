@@ -14,3 +14,13 @@ spring:
     encoding: UTF-8
     #placeholder-replacement: true
     #baseline-on-migrate: true #Elinde hali hazırda tablolar varsa, baseline-on-migrate: true doğru; ama gerçekten yeni bir DB’de ilk kez migration koşacaksan bu satırı kaldırıp en baştan V1’den başlamak da yeterli.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+

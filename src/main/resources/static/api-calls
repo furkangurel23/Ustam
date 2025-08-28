@@ -94,3 +94,25 @@ curl -X POST "$API/api/providers" -H "Content-Type: application/json" -d '{
 # ---------- PROVIDERS: NEARBY (yakın arama) ----------
 # Konum: (39.93, 32.85) Ankara civarı, 10 km yarıçap
 curl "$API/api/providers/near?lat=39.93&lon=32.85&radiusKm=10&page=0&size=10"
+
+# Admin ile yeni provider
+curl -u admin:admin123 -X POST "$API/api/admin/providers" -H "Content-Type: application/json" -d '{
+  "name":"Deneme Usta", "city":"Ankara", "district":"Çankaya",
+  "lat":39.8865, "lon":32.7306, "categoryIds": ['"$CAT"'], "brandIds": ['"$BRAND"']
+}'
+
+
+# ===== AUTH (admin) =====
+# Basic Auth ile admin create denemesi
+curl -u admin:admin123 -X POST "$API/api/admin/providers" -H "Content-Type: application/json" -d '{
+  "name": "Admin Ekledi",
+  "city": "Ankara",
+  "district": "Keçiören",
+  "address": "1003. Cad. No:10",
+  "lat": 39.99, "lon": 32.86,
+  "categoryIds": ['"$CAT"']
+}'
+
+# ===== PROVIDERS: NEAR =====
+# Konum: Ankara civarı, 10 km
+curl "$API/api/providers/near?lat=39.93&lon=32.85&radiusKm=10&page=0&size=10"
