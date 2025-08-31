@@ -8,6 +8,8 @@ import com.furkan.sanayi.dto.RatingDto
 import com.furkan.sanayi.dto.RatingRequest
 import com.furkan.sanayi.repository.ProviderRepository
 import com.furkan.sanayi.repository.RatingRepository
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -19,10 +21,12 @@ class RatingService(
     private val providerRepo: ProviderRepository
 ) {
 
+    @Cacheable(cacheNames = ["providerRatings"], key = "#providerId + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort")
     @Transactional(readOnly = true)
     fun listRatings(providerId: Int, pageable: Pageable): Page<RatingDto> =
         ratingRepo.findAllByProviderId(providerId, pageable)
 
+    @CacheEvict(cacheNames = ["providerRatings"], allEntries = true)
     @Transactional(readOnly = false)
     fun addRating(dto: RatingRequest): IdResponse {
         dto.ensureIdentityValid()

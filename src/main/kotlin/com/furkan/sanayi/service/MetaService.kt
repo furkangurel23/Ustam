@@ -6,6 +6,7 @@ import com.furkan.sanayi.dto.ProviderMiniDto
 import com.furkan.sanayi.repository.BrandRepository
 import com.furkan.sanayi.repository.CategoryRepository
 import com.furkan.sanayi.repository.ProviderRepository
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -19,6 +20,7 @@ class MetaService(
     private val brandRepository: BrandRepository
 ) {
 
+    @Cacheable(cacheNames = ["categories"], key = "#pageable.pageNumber + ':' + @pageable.pageSize + ':' + @pageable.sort")
     @Transactional(readOnly = true)
     fun listCategories(pageable: Pageable): Page<CategoryDto> {
         val page = categoryRepository.findAll(pageable)
@@ -35,6 +37,7 @@ class MetaService(
         return PageImpl(content, pageable, page.totalElements)
     }
 
+    @Cacheable(cacheNames = ["brands"], key = "#pageable.pageNumber + ':' + @pageable.pageSize + ':' + @pageable.sort")
     @Transactional(readOnly = true)
     fun listBrands(pageable: Pageable): Page<BrandDto> {
         val page = brandRepository.findAll(pageable)

@@ -1,3 +1,8 @@
+app:
+  jwt:
+    secret: "7b31f90fa4f5b4eedf99e8335df47a8573faeb071f54bab36349a291292beb89"
+    expiration-ms: 86400000  # 1 gün
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:25432/sanayi
@@ -14,6 +19,10 @@ spring:
     encoding: UTF-8
     #placeholder-replacement: true
     #baseline-on-migrate: true #Elinde hali hazırda tablolar varsa, baseline-on-migrate: true doğru; ama gerçekten yeni bir DB’de ilk kez migration koşacaksan bu satırı kaldırıp en baştan V1’den başlamak da yeterli.
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=10000, expireAfterWrite=10m
 management:
   endpoints:
     web:

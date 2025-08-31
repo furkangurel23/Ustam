@@ -4,4 +4,6 @@ import com.furkan.sanayi.domain.User
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface UserRepository : JpaRepository<User, Long> {
+
+    fun findByEmailIgnoreCase(email: String): User?
 }

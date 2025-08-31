@@ -34,7 +34,7 @@ class Rating(
     @Column(name = "anonymous_id", length = 100)
     var anonymousId: String? = null,
 
-    @Column(name = "ip_address", columnDefinition = "inet")
+    @Column(name = "ip_address", columnDefinition = "inet") //Server doldurur
     @ColumnTransformer(write = "?::inet")
     var ipAddress: String? = null,
 

@@ -9,6 +9,8 @@ import com.furkan.sanayi.repository.ProviderRepository
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -39,6 +41,7 @@ class ProviderService(
         )
     }
 
+    @Cacheable(cacheNames = ["providerDetail"], key = "#id")
     @Transactional(readOnly = true)
     fun getProviderDetail(id: Int): ProviderDetailDto {
         val p = providerRepo.findWithGraphById(id) ?: throw NoSuchElementException("Usta bulunamadi: $id")
@@ -58,6 +61,7 @@ class ProviderService(
         )
     }
 
+    @CacheEvict(cacheNames = ["providerDetail", "categories", "brands"], allEntries = true)
     @Transactional
     fun create(req: ProviderCreateRequest): ProviderCreateResponse {
         req.ensureValid()

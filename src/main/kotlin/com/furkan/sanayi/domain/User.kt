@@ -1,5 +1,6 @@
 package com.furkan.sanayi.domain
 
+import com.furkan.sanayi.security.Role
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
@@ -20,6 +21,13 @@ class User(
 
     @Column(name = "display_name", length = 100)
     var displayName: String? = null,
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", length = 16, nullable = false)
+    var role: Role = Role.USER,
+
+    @Column(name = "enabled", nullable = false)
+    var enabled: Boolean = true,
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
