@@ -19,7 +19,7 @@ class GlobalExceptionHandler {
      * Aynı alan için birden fazla kural ihlalinde hepsini array olarak döndürüyoruz.
      */
     @ExceptionHandler(MethodArgumentNotValidException::class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.CONFLICT)
     fun onValidException(ex: MethodArgumentNotValidException): Map<String, Map<String, List<String>>> {
         val errors: Map<String, List<String>> = ex.bindingResult
             .fieldErrors
