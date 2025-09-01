@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.web.servlet.post
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 class AdminGuardTest : BaseIntegrationTest() {
 
@@ -28,12 +27,13 @@ class AdminGuardTest : BaseIntegrationTest() {
         mockMvc.post("/api/admin/providers") {
             contentType = MediaType.APPLICATION_JSON
             content = """{"name":"X","city":"A","district":"B","lat":1,"lon":1,"categoryIds":[1]}"""
-        }.andExpect { status().isUnauthorized }
+        }.andExpect {
+            status { isUnauthorized() }
+        }
     }
 
     @Test
     fun `user role gets 403 on admin endpoint`() {
-        userRepo.deleteAll()
         val u = userRepo.save(
             User().apply {
                 email = "user@sanayi.local"
@@ -43,12 +43,14 @@ class AdminGuardTest : BaseIntegrationTest() {
                 enabled = true
             }
         )
-        val token = jwt.generate(u.email!!, roles = emptyList())
+        val token = jwt.generate(u.email!!, roles = listOf("USER"))
 
         mockMvc.post("/api/admin/providers") {
             header("Authorization", "Bearer $token")
             contentType = MediaType.APPLICATION_JSON
             content = """{"name":"X","city":"A","district":"B","lat":1,"lon":1,"categoryIds":[1]}"""
-        }.andExpect { status().isForbidden }
+        }.andExpect {
+            status { isForbidden() }
+        }
     }
 }

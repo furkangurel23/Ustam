@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.servlet.MockMvc
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
@@ -20,6 +21,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @Testcontainers
 @ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Sql(scripts = ["/test-sql/reset.sql"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 abstract class BaseIntegrationTest {
     companion object {
         @Container
@@ -27,8 +29,8 @@ abstract class BaseIntegrationTest {
         @ServiceConnection
         val postgres = PostgisContainer.instance()
             .withDatabaseName("sanayi")
-            .withUsername("sanayi")
-            .withPassword("sanayi")
+            .withUsername("sanayi_user")
+            .withPassword("furkan")
 
     }
 

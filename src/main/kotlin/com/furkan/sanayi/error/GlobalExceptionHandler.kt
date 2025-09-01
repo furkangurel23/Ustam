@@ -1,6 +1,7 @@
 package com.furkan.sanayi.error
 
 import com.furkan.sanayi.common.exceptions.InvalidRequestException
+import jakarta.persistence.EntityNotFoundException
 import jakarta.validation.ConstraintViolationException
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
@@ -59,7 +60,7 @@ class GlobalExceptionHandler {
      * Custom business validation hataları (ör: userId ve anonymousId aynı anda/null).
      */
     @ExceptionHandler(InvalidRequestException::class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.CONFLICT)
     fun onInvalidRequest(ex: InvalidRequestException): Map<String, String> =
         mapOf("error" to (ex.message ?: "Invalid request"))
 
@@ -69,4 +70,10 @@ class GlobalExceptionHandler {
         val msg = ex.constraintViolations.mapNotNull { it.message }
         return mapOf("errors" to msg)
     }
+
+    @ExceptionHandler(value = [NoSuchElementException::class, EntityNotFoundException::class, IllegalStateException::class])
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    fun onNotFound(ex: Exception): Map<String, String> =
+        mapOf("error" to (ex.message ?: "Not found"))
+
 }

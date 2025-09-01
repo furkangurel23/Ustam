@@ -8,6 +8,8 @@ import com.furkan.sanayi.dto.RatingDto
 import com.furkan.sanayi.dto.RatingRequest
 import com.furkan.sanayi.repository.ProviderRepository
 import com.furkan.sanayi.repository.RatingRepository
+import com.furkan.sanayi.repository.UserRepository
+import jakarta.persistence.EntityNotFoundException
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.Page
@@ -18,10 +20,14 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class RatingService(
     private val ratingRepo: RatingRepository,
-    private val providerRepo: ProviderRepository
+    private val providerRepo: ProviderRepository,
+    private val userRepo: UserRepository
 ) {
 
-    @Cacheable(cacheNames = ["providerRatings"], key = "#providerId + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort")
+    @Cacheable(
+        cacheNames = ["providerRatings"],
+        key = "#providerId + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort"
+    )
     @Transactional(readOnly = true)
     fun listRatings(providerId: Int, pageable: Pageable): Page<RatingDto> =
         ratingRepo.findAllByProviderId(providerId, pageable)
@@ -31,6 +37,9 @@ class RatingService(
     fun addRating(dto: RatingRequest): IdResponse {
         dto.ensureIdentityValid()
 
+        if (dto.userId != null && !userRepo.existsById(dto.userId)) {
+            throw EntityNotFoundException("Kullanıcı bulunamadı: ${dto.userId}")
+        }
         //tekil oy kontrolu (DB index'leri zaten garanti veriyor; burada kullaniciya iyi mesaj verelim
         if (dto.userId != null && ratingRepo.existsByProviderIdAndUserId(dto.providerId, dto.userId)) {
             throw InvalidRequestException("Bu sağlayıcıyı zaten oyladınız. (kullanıcı)")
@@ -38,7 +47,6 @@ class RatingService(
         if (dto.anonymousId != null && ratingRepo.existsByProviderIdAndAnonymousId(dto.providerId, dto.anonymousId)) {
             throw InvalidRequestException("Bu sağlayıcıyı zaten oyladınız. (anonim)")
         }
-
 
         val provider = providerRepo.findById(dto.providerId)
             .orElseThrow { IllegalStateException("Usta bulunamadı: ${dto.providerId}") }

@@ -1,5 +1,6 @@
 package com.furkan.sanayi
 
+import com.fasterxml.jackson.databind.json.JsonMapper
 import com.furkan.sanayi.testsupport.BaseIntegrationTest
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
@@ -8,7 +9,6 @@ import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 class ProviderIntegrationTest : BaseIntegrationTest() {
-
     @Test
     fun `providers search returns 200`() {
         mockMvc.get("/api/providers") {
@@ -17,19 +17,14 @@ class ProviderIntegrationTest : BaseIntegrationTest() {
             param("size", "5")
         }.andExpect { status().isOk }
     }
-
     @Test
     fun `admin can create provider via JWT`() {
-        val loginJson = """{"email":"admin@sanayi.local","password":"admin123"}"""
         val token = mockMvc.post("/api/auth/login") {
             contentType = MediaType.APPLICATION_JSON
-            content = loginJson
-        }
-            .andExpect { status().isOk }
-            .andReturn().response.contentAsString
-            .let {
-                com.fasterxml.jackson.databind.json.JsonMapper.builder().build()
-                    .readTree(it)["token"].asText()
+            content = """{"email":"admin@sanayi.local","password":"admin123"}"""
+        }.andExpect { status().isOk }
+            .andReturn().response.contentAsString.let {
+                JsonMapper.builder().build().readTree(it)["token"].asText()
             }
 
         val body = """

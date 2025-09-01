@@ -18,7 +18,7 @@ class JwtService(
 
     fun extractEmail(token: String): String? = claims(token = token).subject
 
-    fun generate(email: String, roles: Collection<String>): String {
+    fun generate(email: String, roles: List<String>): String {
         val now = Date()
         return Jwts.builder()
             .setSubject(email)
@@ -28,6 +28,9 @@ class JwtService(
             .signWith(key, SignatureAlgorithm.HS256)
             .compact()
     }
+
+    fun extractRoles(token: String): List<String> =
+        (claims(token)["roles"] as? List<*>)?.filterIsInstance<String>() ?: emptyList()
 
     fun valid(token: String, email: String): Boolean {
         val c = claims(token)

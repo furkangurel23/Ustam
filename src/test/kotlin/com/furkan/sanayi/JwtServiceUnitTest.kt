@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class JwtServiceUnitTest {
-
     @Test
     fun `generate and extract email`() {
         val secret = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"

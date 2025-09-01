@@ -9,12 +9,12 @@ class ClientIpResolverTest {
     private val r = ClientIpResolver()
     @Test
     fun `takes first from XFF when present`() {
-        val req = MockHttpServletRequest()
-        req.addHeader("X-Forwarded-For", "9.9.9.9, 10.0.0.1")
-        req.remoteAddr = "127.0.0.1"
+        val req = MockHttpServletRequest().apply {
+            addHeader("X-Forwarded-For","9.9.9.9, 10.0.0.1")
+            remoteAddr = "127.0.0.1"
+        }
         assertEquals("9.9.9.9", r.from(req))
     }
-
     @Test
     fun `falls back to X-Real-IP`() {
         val req = MockHttpServletRequest()
