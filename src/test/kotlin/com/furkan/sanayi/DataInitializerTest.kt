@@ -1,20 +1,18 @@
 package com.furkan.sanayi
 
 import com.furkan.sanayi.repository.UserRepository
+import com.furkan.sanayi.testsupport.BaseIntegrationTest
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.ApplicationRunner
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
 
-@SpringBootTest
-@ActiveProfiles("test")
-class DataInitializerTest {
+class DataInitializerTest : BaseIntegrationTest() {
 
     @Autowired
     lateinit var userRepo: UserRepository
+
     @Autowired
     @Qualifier("seedAdmin")
     lateinit var seedAdmin: ApplicationRunner

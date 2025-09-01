@@ -243,6 +243,15 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.2.5</version>
+				<configuration>
+					<reuseForks>true</reuseForks>
+					<parallel>none</parallel>
+					<useSystemClassLoader>true</useSystemClassLoader>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

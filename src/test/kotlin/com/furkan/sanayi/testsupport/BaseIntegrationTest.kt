@@ -9,29 +9,23 @@ import org.locationtech.jts.geom.GeometryFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.servlet.MockMvc
-import org.testcontainers.junit.jupiter.Container
-import org.testcontainers.junit.jupiter.Testcontainers
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Testcontainers
 @ActiveProfiles("test")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Sql(scripts = ["/test-sql/reset.sql"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class BaseIntegrationTest {
     companion object {
-        @Container
         @JvmStatic
-        @ServiceConnection
-        val postgres = PostgisContainer.instance()
-            .withDatabaseName("sanayi")
-            .withUsername("sanayi_user")
-            .withPassword("furkan")
-
+        @DynamicPropertySource
+        fun register(reg: org.springframework.test.context.DynamicPropertyRegistry) {
+            TestDbProps.register(reg)
+        }
     }
 
     @Autowired
