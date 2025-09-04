@@ -2,7 +2,8 @@ package com.furkan.sanayi.dto
 
 import com.furkan.sanayi.common.exceptions.InvalidRequestException
 import io.swagger.v3.oas.annotations.media.Schema
-import jakarta.validation.constraints.*
+import jakarta.validation.constraints.DecimalMax
+import jakarta.validation.constraints.DecimalMin
 
 data class ProviderSearchRequest(
     @Schema(example = "Ankara")
