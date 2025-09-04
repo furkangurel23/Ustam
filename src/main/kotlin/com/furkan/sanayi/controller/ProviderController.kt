@@ -13,6 +13,7 @@ import jakarta.validation.constraints.DecimalMin
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PageableDefault
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -23,7 +24,9 @@ class ProviderController(
     @GetMapping
     fun list(
         @ParameterObject @Valid req: ProviderSearchRequest,
-        @ParameterObject pageable: Pageable
+        @ParameterObject @PageableDefault(
+            sort = ["avgScore", "ratingCount", "id"]
+        ) pageable: Pageable
     ): Page<ProviderListItem> = providerService.listProviders(req, pageable)
 
     @GetMapping("/{id}")

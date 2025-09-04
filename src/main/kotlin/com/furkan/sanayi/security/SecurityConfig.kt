@@ -48,6 +48,7 @@ class SecurityConfig(
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
             //Cross-Site Request forgery: Tarayicnin otomatik gonderdigi cookie'ler yuzunden bir sitenin baska siteye senin adina istek atmasi
+            .cors {  } // cors security katmaninda acmis olduk.
             .csrf { it.disable() } // stateless API
             //Session yaratma kullanma. SecurityContext'i sessiona koyma.
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
