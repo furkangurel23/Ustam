@@ -9,6 +9,8 @@ data class ProviderListItem(
     val district: String?,
     val phone: String?,
     val avgScore: BigDecimal?,
-    val ratingCount: Int
+    val ratingCount: Int,
+    val lat: Double?,
+    val lng: Double?
 )
 

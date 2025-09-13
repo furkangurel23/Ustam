@@ -80,4 +80,8 @@ class Provider(
             lat = this.location?.y, // JTS: y=lat
             lng = this.location?.x  // JTS: x=lng
         )
+
+    fun lat() = this.location?.x
+
+    fun lng() = this.location?.y
 }

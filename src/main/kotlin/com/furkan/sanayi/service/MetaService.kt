@@ -20,7 +20,7 @@ class MetaService(
     private val brandRepository: BrandRepository
 ) {
 
-    @Cacheable(cacheNames = ["categories"], key = "#pageable.pageNumber + ':' + @pageable.pageSize + ':' + @pageable.sort")
+    @Cacheable(cacheNames = ["categories"], key = "#pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort")
     @Transactional(readOnly = true)
     fun listCategories(pageable: Pageable): Page<CategoryDto> {
         val page = categoryRepository.findAll(pageable)
@@ -37,7 +37,7 @@ class MetaService(
         return PageImpl(content, pageable, page.totalElements)
     }
 
-    @Cacheable(cacheNames = ["brands"], key = "#pageable.pageNumber + ':' + @pageable.pageSize + ':' + @pageable.sort")
+    @Cacheable(cacheNames = ["brands"], key = "#pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort")
     @Transactional(readOnly = true)
     fun listBrands(pageable: Pageable): Page<BrandDto> {
         val page = brandRepository.findAll(pageable)

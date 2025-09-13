@@ -18,7 +18,9 @@ interface ProviderRepository : JpaRepository<Provider, Int> {
         """
         select new com.furkan.sanayi.dto.ProviderListItem(
             p.id, p.name, p.city, p.district, p.phone,
-            p.avgScore, p.ratingCount
+            p.avgScore, p.ratingCount, 
+            cast(function('ST_Y', p.location) as double),  
+            cast(function('ST_X', p.location) as double) 
         )
         from Provider p
         where (:city is null or p.city = :city)
@@ -81,7 +83,7 @@ interface ProviderRepository : JpaRepository<Provider, Int> {
           ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography,
           :radiusKm * 1000.0
         )
-        ORDER BY distanceKm ASC
+        ORDER BY distanceKm
         """,
         countQuery = """
         SELECT COUNT(1)

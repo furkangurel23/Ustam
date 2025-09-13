@@ -65,7 +65,6 @@ class ProviderService(
     @Transactional
     fun create(req: ProviderCreateRequest): ProviderCreateResponse {
         req.ensureValid()
-        // 1) Kategori/marka doğrulama (mevcut olmayan id'leri bul)
         val categories = if (req.categoryIds.isNotEmpty())
             categoryRepo.findAllById(req.categoryIds).toSet() else emptySet()
         val missingCats = req.categoryIds - categories.map { it.id!! }.toSet()
@@ -78,8 +77,6 @@ class ProviderService(
         if (missingBrands.isNotEmpty())
             throw InvalidRequestException("Geçersiz marka ID(ler): ${missingBrands.joinToString(",")}")
 
-
-        //Location (lon, lat) -> JTS Point(SRID 4326)
 
         val point = geometryFactory.createPoint(Coordinate(req.lon, req.lat))
         point.srid = 4326
@@ -97,7 +94,6 @@ class ProviderService(
 
         val saved = providerRepo.save(p)
         return ProviderCreateResponse(id = saved.id!!, name = saved.name)
-
     }
 
     @Transactional(readOnly = true)
