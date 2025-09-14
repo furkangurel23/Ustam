@@ -78,10 +78,10 @@ class Provider(
             district = this.district,
             phone = this.phone,
             lat = this.location?.y, // JTS: y=lat
-            lng = this.location?.x  // JTS: x=lng
+            lon = this.location?.x  // JTS: x=lon
         )
 
     fun lat() = this.location?.x
 
-    fun lng() = this.location?.y
+    fun lon() = this.location?.y
 }

@@ -8,5 +8,5 @@ data class ProviderMiniDto(
     val district: String?,
     val phone: String?,
     val lat: Double?,
-    val lng: Double?
+    val lon: Double?
 )

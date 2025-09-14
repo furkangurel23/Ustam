@@ -98,7 +98,7 @@ class ProviderService(
 
     @Transactional(readOnly = true)
     fun nearby(lat: Double, lon: Double, radiusKm: Double, pageable: Pageable): Page<ProviderNearItem> {
-        if (radiusKm <= 0.0 || radiusKm > 100.0) {
+        if (radiusKm <= 0.0 || radiusKm > 20000.0) {
             throw InvalidRequestException("radiusKm 0-100 arasında olmalıdır.")
         }
         val page = providerRepo.findNearby(lat, lon, radiusKm, pageable)

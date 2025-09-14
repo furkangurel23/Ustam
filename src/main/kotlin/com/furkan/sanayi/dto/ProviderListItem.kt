@@ -11,6 +11,6 @@ data class ProviderListItem(
     val avgScore: BigDecimal?,
     val ratingCount: Int,
     val lat: Double?,
-    val lng: Double?
+    val lon: Double?
 )
 
