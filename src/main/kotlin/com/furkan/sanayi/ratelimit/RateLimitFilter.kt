@@ -41,7 +41,8 @@ class RateLimitFilter(
             response.status = HttpStatus.TOO_MANY_REQUESTS.value()
             response.contentType = "application/json"
             response.setHeader("Retry-After", "60")
-            response.writer.write("""{"error":"Too many requests"}""")
+            response.setHeader("Cache-Control", "no-store")
+            response.writer.write("""{"code":"RATE_LIMIT","message":"Too many requests","details":null}""")
         }
     }
 

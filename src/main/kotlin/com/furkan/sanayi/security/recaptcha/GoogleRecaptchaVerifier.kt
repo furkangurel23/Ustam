@@ -24,7 +24,7 @@ class GoogleRecaptchaVerifier(
         val body = LinkedMultiValueMap<String, String>().apply {
             add("secret", props.secret)
             add("response", t)
-            if (!remoteIp.isNullOrBlank()) add("remoteIp", remoteIp)
+            if (!remoteIp.isNullOrBlank()) add("remoteip", remoteIp)
         }
 
         val req = HttpEntity(body.apply { }, HttpHeaders().apply {
@@ -36,7 +36,7 @@ class GoogleRecaptchaVerifier(
 
         val ok = (resp.body?.get("success") as? Boolean) == true
         if (!ok) {
-            val codes = (resp.body?.get("error-codes") as? List<*>)?.joinToString { "," } ?: "unknown"
+            val codes = (resp.body?.get("error-codes") as? List<*>)?.joinToString(",") ?: "unknown"
             throw IllegalStateException("Failed reCAPTCHA: $codes")
         }
     }

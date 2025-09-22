@@ -6,7 +6,7 @@ app:
     origins: http://localhost:3000,https://sanayi.dev
   recaptcha:
     enabled: false
-    secret: "${RECATPCHA_SECRET}"
+    secret: "${RECAPTCHA_SECRET}"
   ratelimit:
     enabled: true
     perMinute: 30
