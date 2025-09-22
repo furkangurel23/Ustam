@@ -29,7 +29,10 @@ data class RatingRequest(
     val anonymousId: String? = null,
 
     @Schema(example = "1.2.3.4", description = "İstemcinin IP adresi (IPv4 veya IPv6)")
-    val ip: String? = null
+    val ip: String? = null,
+
+    @Schema(example = "recaptcha-token", description = "Anonim oy için reCAPTCHA v2 token; prod'da zorunlu")
+    val recaptchaToken: String? = null
 ) {
     fun ensureIdentityValid() {
         if (!((userId != null) xor (anonymousId != null))) {

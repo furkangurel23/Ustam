@@ -3,6 +3,8 @@ package com.furkan.sanayi.controller
 import com.furkan.sanayi.dto.IdResponse
 import com.furkan.sanayi.dto.RatingDto
 import com.furkan.sanayi.dto.RatingRequest
+import com.furkan.sanayi.security.SecurityFacade
+import com.furkan.sanayi.security.recaptcha.RecaptchaVerifier
 import com.furkan.sanayi.service.RatingService
 import com.furkan.sanayi.web.ClientIpResolver
 import jakarta.servlet.http.HttpServletRequest
@@ -16,7 +18,9 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api")
 class RatingController(
     private val ratingService: RatingService,
-    private val ipResolver: ClientIpResolver
+    private val ipResolver: ClientIpResolver,
+    private val securityFacade: SecurityFacade,
+    private val recaptcha: RecaptchaVerifier
 ) {
 
     @GetMapping("/providers/{id}/ratings")
@@ -29,6 +33,15 @@ class RatingController(
         @RequestBody @Valid body: RatingRequest
     ): IdResponse {
         val ip = ipResolver.from(request)
-        return ratingService.addRating(body.copy(ip = ip))
+        val fixed = securityFacade.idOrNull()?.let { id ->
+            body.copy(userId = id, anonymousId = null, ip = ip)
+        } ?: body.copy(ip = ip)
+
+        //Anonim ise ve prod'da reCAPTCHA aciksa dogrula
+        if (fixed.userId == null) {
+            recaptcha.verifyOrThrow(fixed.recaptchaToken, ip)
+        }
+
+        return ratingService.addRating(fixed)
     }
 }

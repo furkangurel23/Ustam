@@ -9,10 +9,7 @@ CREATE TABLE IF NOT EXISTS users
     updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Dolu e-postaları tekil yapan partial unique index
--- (NULL değerler birden fazla olabilir)
-CREATE UNIQUE INDEX IF NOT EXISTS users_email_unique_not_null
-    ON users (email) WHERE email IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS ux_users_email_lower ON users ((lower(email))) WHERE email IS NOT NULL;
 
 -- 2) PROVIDERS (Usta / Servis)
 CREATE TABLE IF NOT EXISTS providers
@@ -94,6 +91,7 @@ CREATE UNIQUE INDEX uniq_rating_anon
 
 -- İsteğe bağlı yardımcı indexler (sorgu hızlandırma)
 CREATE INDEX IF NOT EXISTS idx_ratings_provider ON ratings (provider_id);
-CREATE INDEX IF NOT EXISTS idx_providers_city ON providers (city);
-CREATE INDEX IF NOT EXISTS idx_providers_district ON providers (district);
 
+CREATE INDEX IF NOT EXISTS idx_providers_city_district ON providers (lower(city), lower(district));
+CREATE INDEX IF NOT EXISTS idx_providers_city_lower ON providers ((lower(city)));
+CREATE INDEX IF NOT EXISTS idx_providers_district_lower ON providers ((lower(district)));

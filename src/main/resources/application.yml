@@ -4,6 +4,12 @@ app:
     expiration-ms: 86400000  # 1 gün
   cors:
     origins: http://localhost:3000,https://sanayi.dev
+  recaptcha:
+    enabled: false
+    secret: "${RECATPCHA_SECRET}"
+  ratelimit:
+    enabled: true
+    perMinute: 30
 
 spring:
   datasource:
@@ -37,4 +43,9 @@ management:
     health:
       probes:
         enabled: true
+springdoc:
+  swagger-ui:
+    path: /swagger-ui
+  api-docs:
+    path: /v3/api-docs
 

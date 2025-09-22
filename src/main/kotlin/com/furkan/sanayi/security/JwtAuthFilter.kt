@@ -30,7 +30,7 @@ class JwtAuthFilter(
                 val ud = uds.loadUserByUsername(email)
 
                 val authorities = if (tokenRoles.isNotEmpty())
-                    tokenRoles.map { SimpleGrantedAuthority("ROLES_${it.uppercase()}") }
+                    tokenRoles.map { SimpleGrantedAuthority("ROLE_${it.uppercase()}") }
                 else ud.authorities
 
                 val auth = UsernamePasswordAuthenticationToken(ud.username, null, authorities).also {

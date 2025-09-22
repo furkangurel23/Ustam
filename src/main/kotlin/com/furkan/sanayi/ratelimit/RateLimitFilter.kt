@@ -15,33 +15,34 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class RateLimitFilter(
-    private val ipResolver: ClientIpResolver
+    private val ipResolver: ClientIpResolver,
+    private val props: RateLimitProps
 ) : OncePerRequestFilter() {
     private val buckets = ConcurrentHashMap<String, Bucket>()
 
+    /*
     //kova'nin kapasitesi ve dolum hizini belirliyor. 10 istek/saat ve 3 istek/dakika
     private val perHour = Bandwidth.classic(10, Refill.greedy(10, Duration.ofHours(1)))
     private val perMinute = Bandwidth.classic(3, Refill.greedy(3, Duration.ofMinutes(1)))
-
-    override fun doFilterInternal(
-        request: HttpServletRequest,
-        response: HttpServletResponse,
-        filterChain: FilterChain
-    ) {
-        if (isRatingPost(request)) {
-            val key = "rate:${ipResolver.from(request)}"
-            val bucket = buckets.computeIfAbsent(key) {
-                Bucket.builder().addLimit(perHour).addLimit(perMinute).build()
-            }
-            if (!bucket.tryConsume(1)) {
-                response.status = HttpStatus.TOO_MANY_REQUESTS.value()
-                response.contentType = "application/json"
-                response.writer.write("""{"error":"Too many requests"}""")
-                response.setHeader("Retry-After", "60")
-                return
-            }
+    */
+    override fun doFilterInternal(req: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {
+        if (!props.enabled || !isRatingPost(req)) {
+            chain.doFilter(req, response); return
         }
-        filterChain.doFilter(request, response)
+        val ip = ipResolver.from(req)
+        val bucket = buckets.computeIfAbsent(ip) {
+            val limit = props.perMinute.toLong().coerceAtLeast(1)
+            val bandwidth = Bandwidth.classic(limit, Refill.greedy(limit, Duration.ofMinutes(1)))
+            Bucket.builder().addLimit(bandwidth).build()
+        }
+        if (bucket.tryConsume(1)) {
+            chain.doFilter(req, response)
+        } else {
+            response.status = HttpStatus.TOO_MANY_REQUESTS.value()
+            response.contentType = "application/json"
+            response.setHeader("Retry-After", "60")
+            response.writer.write("""{"error":"Too many requests"}""")
+        }
     }
 
     private fun isRatingPost(req: HttpServletRequest): Boolean =

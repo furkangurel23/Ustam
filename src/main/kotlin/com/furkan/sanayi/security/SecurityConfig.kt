@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.config.Customizer.withDefaults
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -48,13 +47,19 @@ class SecurityConfig(
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
             //Cross-Site Request forgery: Tarayicnin otomatik gonderdigi cookie'ler yuzunden bir sitenin baska siteye senin adina istek atmasi
-            .cors {  } // cors security katmaninda acmis olduk.
+            .cors { } // cors security katmaninda acmis olduk.
             .csrf { it.disable() } // stateless API
             //Session yaratma kullanma. SecurityContext'i sessiona koyma.
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
                 it
-                    .requestMatchers("/api/auth/login", "/v3/api-docs/**", "/swagger-ui/**", "/actuator/health/**")
+                    .requestMatchers(
+                        "/api/auth/login",
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/actuator/health/**",
+                        "/swagger-ui.html"
+                    )
                     .permitAll()
                     .requestMatchers(
                         HttpMethod.GET,
@@ -71,7 +76,7 @@ class SecurityConfig(
             .exceptionHandling { conf -> conf.authenticationEntryPoint { _, resp, _ -> resp.sendError(401) } }
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
             .addFilterBefore(rateLimitFilter, JwtAuthFilter::class.java)
-            .httpBasic(withDefaults())
+            .httpBasic { it.disable() }
         return http.build()
     }
 }

@@ -12,17 +12,20 @@ import org.springframework.context.annotation.Configuration
 class OpenApiConfig {
 
     @Bean
-    fun customOpenAPI(): OpenAPI =
-        OpenAPI().info(
-            Info().title("Sanayi API")
-                .version("v1")
-                .description("Servis sağlayıcı arama, puanlama ve yönetim API’leri")
-        )
-            .components(
-                Components().addSecuritySchemes(
-                    "basicAuth",
-                    SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("basic")
-                )
+    fun customOpenAPI(): OpenAPI {
+        val bearer = SecurityScheme().type(SecurityScheme.Type.HTTP)
+            .scheme("bearer")
+            .bearerFormat("JWT")
+
+        return OpenAPI()
+            .info(
+                Info()
+                    .title("Sanayi API")
+                    .version("v1")
+                    .description("Ustalar, yorumlar, puanlama ve arama servisleri")
             )
-            .addSecurityItem(SecurityRequirement().addList("basicAuth"))
+            .components(Components().addSecuritySchemes("bearerAuth", bearer))
+            .addSecurityItem(SecurityRequirement().addList("bearerAuth"))
+    }
+
 }

@@ -1,4 +1,3 @@
-CREATE INDEX IF NOT EXISTS idx_providers_city_district ON providers (lower(city), lower(district));
 CREATE INDEX IF NOT EXISTS idx_provider_categories ON provider_categories (category_id, provider_id);
 CREATE INDEX IF NOT EXISTS idx_provider_brands ON provider_brands (brand_id, provider_id);
 

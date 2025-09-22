@@ -4,12 +4,14 @@ import com.furkan.sanayi.dto.ProviderCreateRequest
 import com.furkan.sanayi.dto.ProviderCreateResponse
 import com.furkan.sanayi.service.ProviderService
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/admin/providers")
+@SecurityRequirement(name = "bearerAuth")
 class ProviderAdminController(
     private val providerService: ProviderService
 ) {

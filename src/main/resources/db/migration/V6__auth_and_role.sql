@@ -4,4 +4,3 @@ ALTER TABLE users
 ALTER TABLE users
     ADD COLUMN IF NOT EXISTS enabled BOOLEAN NOT NULL DEFAULT TRUE;
 
-CREATE UNIQUE INDEX IF NOT EXISTS ux_users_email_lower ON users ((lower(email))) WHERE email IS NOT NULL;
