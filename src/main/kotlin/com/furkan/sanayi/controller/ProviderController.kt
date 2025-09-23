@@ -25,7 +25,7 @@ class ProviderController(
     fun list(
         @ParameterObject @Valid req: ProviderSearchRequest,
         @ParameterObject @PageableDefault(
-            sort = ["avgScore", "ratingCount", "id"]
+            sort = ["avgScore,desc", "ratingCount,desc", "id,desc"]
         ) pageable: Pageable
     ): Page<ProviderListItem> = providerService.listProviders(req, pageable)
 

@@ -27,7 +27,7 @@ class RatingService(
     fun listRatings(providerId: Int, pageable: Pageable): Page<RatingDto> =
         ratingRepo.findAllByProviderId(providerId, pageable)
 
-    @CacheEvict(cacheNames = ["providerRatings"], allEntries = true)
+    @CacheEvict(cacheNames = ["providerRatings", "providerDetail"], allEntries = true)
     @Transactional
     fun addRating(req: RatingRequest): IdResponse {
         req.ensureIdentityValid()

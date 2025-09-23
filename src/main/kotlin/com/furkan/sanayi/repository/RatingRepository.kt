@@ -5,6 +5,7 @@ import com.furkan.sanayi.dto.RatingDto
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 
@@ -45,4 +46,18 @@ interface RatingRepository : JpaRepository<Rating, Int> {
         @Param("providerId") providerId: Int,
         @Param("anon") anonymousId: String
     ): Rating?
+
+    /*
+    * ilgili provider bulunup cacheli hedefi temizleyeegiz.
+    * */
+    @Query("select r.provider.id from Rating r where r.id = :id")
+    fun findProviderIdByRatingId(@Param("id") id: Int): Int?
+
+    @Modifying
+    @Query("update Rating r set r.deletedAt = CURRENT_TIMESTAMP where r.id = :id and r.deletedAt is null")
+    fun softDeleteById(@Param("id") id: Int): Int
+
+    @Modifying
+    @Query("update Rating r set r.deletedAt = null where r.id = :id and r.deletedAt is not null")
+    fun restoreById(@Param("id") id: Int): Int
 }
