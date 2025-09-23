@@ -66,7 +66,7 @@ class SecurityConfig(
                         "/api/providers/**",
                         "/api/categories/**",
                         "/api/brands/**",
-                        "/api/**/ratings/**"
+                        "/api/providers/*/ratings/**"
                     ).permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/ratings/rate").permitAll()
                     // Admin

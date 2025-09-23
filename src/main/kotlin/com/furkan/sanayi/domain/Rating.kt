@@ -40,5 +40,8 @@ class Rating(
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    var createdAt: Instant? = null
+    var createdAt: Instant? = null,
+
+    @Column(name = "deleted_at")
+    var deletedAt: Instant? = null
 )

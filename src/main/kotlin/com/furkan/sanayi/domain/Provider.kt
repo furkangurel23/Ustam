@@ -81,7 +81,7 @@ class Provider(
             lon = this.location?.x  // JTS: x=lon
         )
 
-    fun lat() = this.location?.x
+    fun lat() = this.location?.y
+    fun lon() = this.location?.x
 
-    fun lon() = this.location?.y
 }

@@ -30,10 +30,14 @@ class ProviderService(
         page: Pageable
     ): Page<ProviderListItem> {
         req.ensureValid()
+
+        val city = req.city?.trim()?.lowercase() ?: "ankara"
+        val district = req.district?.trim()?.lowercase()
+
         return providerRepo.search(
             categoryId = req.categoryId,
-            city = req.city,
-            district = req.district,
+            city = city,
+            district = district,
             brandId = req.brandId,
             minScore = req.minScore,
             maxScore = req.maxScore,

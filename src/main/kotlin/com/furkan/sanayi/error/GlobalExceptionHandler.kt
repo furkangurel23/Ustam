@@ -41,20 +41,30 @@ class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException::class)
     @ResponseStatus(HttpStatus.CONFLICT)
     fun onDataIntegrity(ex: DataIntegrityViolationException): Map<String, String> {
-        val rootMsg = ex.rootCause?.message ?: ex.message ?: ""
-
-        val friendlyMsg = when {
-            rootMsg.contains("uq_rating_user", ignoreCase = true) ->
+        val rootMsg = ex.rootCause?.message ?: ex.message.orEmpty()
+        val friendly = when {
+            rootMsg.contains("uniq_rating_user_active", true) ||
+                    rootMsg.contains("uq_rating_user", true) ->
                 "Bu sağlayıcıyı zaten oyladınız. (kullanıcı)"
 
-            rootMsg.contains("uq_rating_anon", ignoreCase = true) ->
+            rootMsg.contains("uniq_rating_anon_active", true) ||
+                    rootMsg.contains("uq_rating_anon", true) ->
                 "Bu sağlayıcıyı zaten oyladınız. (anonim)"
 
-            else ->
-                "Veri bütünlüğü hatası: ${rootMsg.take(200)}"
+            rootMsg.contains("ux_users_email_lower", true) ->
+                "Bu e-posta adresi zaten kayıtlı."
+
+            rootMsg.contains("provider_brands_pkey", true) ->
+                "Bu marka zaten bu sağlayıcıya eklenmiş."
+
+            rootMsg.contains("provider_categories_pkey", true) ->
+                "Bu kategori zaten bu sağlayıcıya eklenmiş."
+
+            else -> "Veri bütünlüğü hatası: ${rootMsg.take(200)}"
         }
-        return mapOf("error" to friendlyMsg, "error_detail" to rootMsg.take(1000))
+        return mapOf("error" to friendly, "error_detail" to rootMsg.take(1000))
     }
+
 
     /**
      * Custom business validation hataları (ör: userId ve anonymousId aynı anda/null).

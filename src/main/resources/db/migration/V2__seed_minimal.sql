@@ -1,6 +1,6 @@
 -- V4__seed_data.sql
 -- Seed data for categories, brands, providers, relations, and sample ratings
--- Assumptions: 
+-- Assumptions:
 --   - providers.location is geometry(Point,4326)
 --   - join tables are provider_categories(provider_id, category_id) and provider_brands(provider_id, brand_id)
 

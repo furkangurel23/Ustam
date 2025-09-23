@@ -16,28 +16,28 @@ interface ProviderRepository : JpaRepository<Provider, Int> {
 
     @Query(
         """
-        select new com.furkan.sanayi.dto.ProviderListItem(
-            p.id, p.name, p.city, p.district, p.phone,
-            p.avgScore, p.ratingCount, 
-            cast(function('ST_Y', p.location) as double),  
-            cast(function('ST_X', p.location) as double) 
-        )
-        from Provider p
-        where (:city is null or p.city = :city)
-          and (:district is null or p.district = :district)
-          and (:categoryId is null or exists (
-                select 1 from p.categories c where c.id = :categoryId
-          ))
-          and (:brandId is null or exists (
-                select 1 from p.brands b where b.id = :brandId
-          ))
-          and (:minScore is null or p.avgScore >= :minScore)
-          and (:maxScore is null or p.avgScore <= :maxScore)
+    select new com.furkan.sanayi.dto.ProviderListItem(
+        p.id, p.name, p.city, p.district, p.phone,
+        p.avgScore, p.ratingCount,
+        cast(function('ST_Y', p.location) as double),
+        cast(function('ST_X', p.location) as double)
+    )
+    from Provider p
+    where (:city is null or lower(p.city) = :city)
+      and (:district is null or lower(p.district) = :district)
+      and (:categoryId is null or exists (
+            select 1 from p.categories c where c.id = :categoryId
+      ))
+      and (:brandId is null or exists (
+            select 1 from p.brands b where b.id = :brandId
+      ))
+      and (:minScore is null or p.avgScore >= :minScore)
+      and (:maxScore is null or p.avgScore <= :maxScore)
     """
     )
     fun search(
         @Param("categoryId") categoryId: Int?,
-        @Param("city") city: String? = "Ankara",
+        @Param("city") city: String?,
         @Param("district") district: String?,
         @Param("brandId") brandId: Int?,
         @Param("minScore") minScore: Double?,

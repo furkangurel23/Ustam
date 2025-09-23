@@ -1,15 +1,12 @@
 package com.furkan.sanayi.service
 
-import com.furkan.sanayi.common.exceptions.InvalidRequestException
+import com.furkan.sanayi.domain.Provider
 import com.furkan.sanayi.domain.Rating
 import com.furkan.sanayi.domain.User
 import com.furkan.sanayi.dto.IdResponse
 import com.furkan.sanayi.dto.RatingDto
 import com.furkan.sanayi.dto.RatingRequest
-import com.furkan.sanayi.repository.ProviderRepository
 import com.furkan.sanayi.repository.RatingRepository
-import com.furkan.sanayi.repository.UserRepository
-import jakarta.persistence.EntityNotFoundException
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.Page
@@ -20,8 +17,6 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class RatingService(
     private val ratingRepo: RatingRepository,
-    private val providerRepo: ProviderRepository,
-    private val userRepo: UserRepository
 ) {
 
     @Cacheable(
@@ -33,33 +28,38 @@ class RatingService(
         ratingRepo.findAllByProviderId(providerId, pageable)
 
     @CacheEvict(cacheNames = ["providerRatings"], allEntries = true)
-    @Transactional(readOnly = false)
-    fun addRating(dto: RatingRequest): IdResponse {
-        dto.ensureIdentityValid()
+    @Transactional
+    fun addRating(req: RatingRequest): IdResponse {
+        req.ensureIdentityValid()
 
-        if (dto.userId != null && !userRepo.existsById(dto.userId)) {
-            throw EntityNotFoundException("Kullanıcı bulunamadı: ${dto.userId}")
-        }
-        //tekil oy kontrolu (DB index'leri zaten garanti veriyor; burada kullaniciya iyi mesaj verelim
-        if (dto.userId != null && ratingRepo.existsByProviderIdAndUserId(dto.providerId, dto.userId)) {
-            throw InvalidRequestException("Bu sağlayıcıyı zaten oyladınız. (kullanıcı)")
-        }
-        if (dto.anonymousId != null && ratingRepo.existsByProviderIdAndAnonymousId(dto.providerId, dto.anonymousId)) {
-            throw InvalidRequestException("Bu sağlayıcıyı zaten oyladınız. (anonim)")
+        val existing = when {
+            req.userId != null ->
+                ratingRepo.findActiveByProviderAndUser(req.providerId, req.userId)
+
+            !req.anonymousId.isNullOrBlank() ->
+                ratingRepo.findActiveByProviderAndAnon(req.providerId, req.anonymousId)
+
+            else -> null
         }
 
-        val provider = providerRepo.findById(dto.providerId)
-            .orElseThrow { IllegalStateException("Usta bulunamadı: ${dto.providerId}") }
-        val saved = ratingRepo.save(
-            Rating(
-                provider = provider,
-                score = dto.score,
-                commentText = dto.comment,
-                user = dto.userId?.let { User(it) },
-                anonymousId = dto.anonymousId,
-                ipAddress = dto.ip
+        return if (existing == null) {
+            val entity = Rating(
+                provider = Provider(id = req.providerId),
+                score = req.score,
+                commentText = req.comment?.trim(),
+                user = req.userId?.let { User(id = it) },  // User.id türünü projendeki ile eşleştir
+                anonymousId = req.anonymousId,
+                ipAddress = req.ip,
+                deletedAt = null
             )
-        )
-        return IdResponse(saved.id!!)
+            IdResponse(ratingRepo.save(entity).id!!)
+        } else {
+            existing.score = req.score
+            existing.commentText = req.comment?.trim()
+            existing.ipAddress = req.ip
+
+            // provider değiştirmiyoruz burada; gerekirse ayrı uç
+            IdResponse(ratingRepo.save(existing).id!!)
+        }
     }
 }
