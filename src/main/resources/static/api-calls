@@ -116,3 +116,40 @@ curl -u admin:admin123 -X POST "$API/api/admin/providers" -H "Content-Type: appl
 # ===== PROVIDERS: NEAR =====
 # Konum: Ankara civarı, 10 km
 curl "$API/api/providers/near?lat=39.93&lon=32.85&radiusKm=10&page=0&size=10"
+
+
+# 1) Login (admin seed'li ortamda)
+curl -s -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"admin@sanayi.local","password":"admin123"}'
+
+# Çıkan token'ı kaydet -> $TOK
+
+# 2) Örnek: rating listesi (silmeden önce say)
+curl -s "http://localhost:8080/api/providers/1/ratings?page=0&size=10" | jq .
+
+# 3) Sil
+curl -i -X DELETE http://localhost:8080/api/admin/ratings/1 \
+  -H "Authorization: Bearer $TOK"
+
+# 4) Tekrar listele; count düşmüş olmalı, avg değişmiş olabilir
+curl -s "http://localhost:8080/api/providers/1/ratings?page=0&size=10" | jq .
+
+# 5) Geri al
+curl -i -X POST http://localhost:8080/api/admin/ratings/1/restore \
+  -H "Authorization: Bearer $TOK"
+
+
+# Şunları bir dene:
+
+# 1) 'ho%' prefix (isim)
+curl -s "http://localhost:8080/api/providers?q=ho&page=0&size=5" | jq .
+
+# 2) 'kon%' prefix (adres)
+curl -s "http://localhost:8080/api/providers?q=kon&page=0&size=5" | jq .
+
+# 3) Şehir filtresi + q
+curl -s "http://localhost:8080/api/providers?city=Ankara&q=ost&page=0&size=5" | jq .
+
+# 4) Kısa q (hata beklenir)
+curl -i "http://localhost:8080/api/providers?q=h"

@@ -24,7 +24,10 @@ data class ProviderSearchRequest(
 
     @field:DecimalMin("-5.0") @field:DecimalMax("5.0")
     @Schema(example = "5.0", description = "Maksimum ortalama puan (-5..5)")
-    val maxScore: Double? = null
+    val maxScore: Double? = null,
+
+    @Schema(example = "honda", description = "İsim/adres prefix araması, en az 2 karakter")
+    val q: String? = null
 ) {
     fun ensureValid() {
         if (minScore != null && maxScore != null && minScore > maxScore) {

@@ -33,6 +33,7 @@ class ProviderService(
 
         val city = req.city?.trim()?.lowercase() ?: "ankara"
         val district = req.district?.trim()?.lowercase()
+        val q = req.q?.trim()?.lowercase()
 
         return providerRepo.search(
             categoryId = req.categoryId,
@@ -41,6 +42,7 @@ class ProviderService(
             brandId = req.brandId,
             minScore = req.minScore,
             maxScore = req.maxScore,
+            q = q,
             pageable = page
         )
     }

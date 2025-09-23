@@ -13,6 +13,7 @@ import jakarta.validation.constraints.DecimalMin
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
 import org.springframework.web.bind.annotation.*
 
@@ -21,18 +22,20 @@ import org.springframework.web.bind.annotation.*
 class ProviderController(
     private val providerService: ProviderService
 ) {
+    @Operation(summary = "Parametrelere göre sağlayıcıları listele")
     @GetMapping
     fun list(
         @ParameterObject @Valid req: ProviderSearchRequest,
         @ParameterObject @PageableDefault(
-            sort = ["avgScore,desc", "ratingCount,desc", "id,desc"]
+            sort = ["avgScore", "ratingCount", "id"],
+            direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): Page<ProviderListItem> = providerService.listProviders(req, pageable)
 
     @GetMapping("/{id}")
     fun detail(@PathVariable id: Int): ProviderDetailDto = providerService.getProviderDetail(id)
 
-    @Operation(summary = "onuma göre yakın servis sağlayıcıları listele")
+    @Operation(summary = "konuma göre yakın servis sağlayıcıları listele")
     @GetMapping("/near")
     fun near(
         @Parameter(description = "Latitude")

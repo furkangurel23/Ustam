@@ -53,6 +53,10 @@ CREATE INDEX IF NOT EXISTS idx_providers_location_gist ON providers USING GIST (
 CREATE INDEX IF NOT EXISTS idx_providers_avg_score ON providers (avg_score);
 CREATE INDEX IF NOT EXISTS idx_providers_rating_count ON providers (rating_count);
 
+-- Prefix arama için pattern_ops + expression index
+CREATE INDEX IF NOT EXISTS idx_providers_name_lower_pattern ON providers ((lower(name)) varchar_pattern_ops);
+CREATE INDEX IF NOT EXISTS idx_providers_address_lower_pattern ON providers ((lower(address)) varchar_pattern_ops);
+
 -- 3) BRANDS & CATEGORIES
 CREATE TABLE IF NOT EXISTS brands
 (
