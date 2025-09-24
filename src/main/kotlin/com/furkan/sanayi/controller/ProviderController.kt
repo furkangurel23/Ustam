@@ -1,5 +1,6 @@
 package com.furkan.sanayi.controller
 
+import com.furkan.sanayi.common.enums.NearSort
 import com.furkan.sanayi.dto.ProviderDetailDto
 import com.furkan.sanayi.dto.ProviderListItem
 import com.furkan.sanayi.dto.ProviderNearItem
@@ -44,8 +45,12 @@ class ProviderController(
         @RequestParam @DecimalMin("-180.0") @DecimalMax("180.0") lon: Double,
         @Parameter(description = "Yarıçap (km), 0-100")
         @RequestParam(defaultValue = "10.0") radiusKm: Double,
+        @Parameter(description = "Sıralama modu: DISTANCE | TOP | WORST")
+        @RequestParam(name = "mode", required = false) mode: NearSort?,
+        @Parameter(description = "Minimum oy sayısı (rating_count). TOP/WORST için default 1")
+        @RequestParam(required = false) minRatings: Int?,
         @ParameterObject pageable: Pageable
     ): Page<ProviderNearItem> =
-        providerService.nearby(lat = lat, lon = lon, radiusKm = radiusKm, pageable = pageable)
+        providerService.nearby(lat = lat, lon = lon, radiusKm = radiusKm, mode = mode, minRatings = minRatings, pageable = pageable)
 
 }

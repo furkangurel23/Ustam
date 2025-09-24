@@ -1,5 +1,6 @@
 package com.furkan.sanayi.service
 
+import com.furkan.sanayi.common.enums.NearSort
 import com.furkan.sanayi.common.enums.SortMode
 import com.furkan.sanayi.common.exceptions.InvalidRequestException
 import com.furkan.sanayi.domain.Provider
@@ -127,11 +128,25 @@ class ProviderService(
     }
 
     @Transactional(readOnly = true)
-    fun nearby(lat: Double, lon: Double, radiusKm: Double, pageable: Pageable): Page<ProviderNearItem> {
+    fun nearby(
+        lat: Double,
+        lon: Double,
+        radiusKm: Double,
+        mode: NearSort?,
+        minRatings: Int?,
+        pageable: Pageable
+    ): Page<ProviderNearItem> {
         if (radiusKm <= 0.0 || radiusKm > 100.0) {
             throw InvalidRequestException("radiusKm 0-100 arasında olmalıdır.")
         }
-        val page = providerRepo.findNearby(lat, lon, radiusKm, pageable)
+
+        val effectiveSort = mode ?: NearSort.DISTANCE
+        val effectiveMinRatings = minRatings ?: if (effectiveSort != NearSort.DISTANCE) 1 else null
+
+        // !! pageable’daki sort’u sıfırla ki Spring ikinci ORDER BY eklemesin
+        val pageNoSort = PageRequest.of(pageable.pageNumber, pageable.pageSize)
+
+        val page = providerRepo.findNearby(lat, lon, radiusKm, effectiveSort.name, effectiveMinRatings, pageNoSort)
         val items = page.content.map { row ->
             ProviderNearItem(
                 id = (row[0] as Number).toInt(),

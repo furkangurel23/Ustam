@@ -72,35 +72,49 @@ interface ProviderRepository : JpaRepository<Provider, Int> {
     )
     fun findByBrandIds(@Param("brandIds") brandIds: Collection<Int>): List<Provider>
 
+    // ProviderRepository.kt
     @Query(
-        value = """
-        SELECT 
-          p.id,
-          p.name,
-          p.city,
-          p.district,
-          p.avg_score AS avgScore,
-          p.rating_count AS ratingCount,
-          ST_Distance(
-            p.location::geography,
-            ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography
-          ) / 1000.0 AS distanceKm
-        FROM providers p
-        WHERE ST_DWithin(
-          p.location::geography,
-          ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography,
-          :radiusKm * 1000.0
-        )
-        ORDER BY distanceKm
-        """,
+        value =
+        """
+            SELECT 
+              p.id,
+              p.name,
+              p.city,
+              p.district,
+              p.avg_score AS avgScore,
+              p.rating_count AS ratingCount,
+              ST_Distance(
+                p.location::geography,
+                ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography
+              ) / 1000.0 AS distanceKm
+            FROM providers p
+            WHERE ST_DWithin(
+              p.location::geography,
+              ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography,
+              :radiusKm * 1000.0
+            )
+              AND (:minRatings IS NULL OR p.rating_count >= :minRatings)
+            ORDER BY
+              CASE WHEN :sort = 'DISTANCE' THEN
+                ST_Distance(
+                  p.location::geography,
+                  ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography
+                ) / 1000.0
+              END ASC NULLS LAST,
+              CASE WHEN :sort = 'TOP' THEN p.avg_score END DESC NULLS LAST,
+              CASE WHEN :sort = 'WORST' THEN p.avg_score END ASC NULLS LAST,
+              p.rating_count DESC,
+              p.id DESC
+            """,
         countQuery = """
-        SELECT COUNT(1)
-        FROM providers p
-        WHERE ST_DWithin(
-          p.location::geography,
-          ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography,
-          :radiusKm * 1000.0
-        )
+            SELECT COUNT(1)
+            FROM providers p
+            WHERE ST_DWithin(
+              p.location::geography,
+              ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography,
+              :radiusKm * 1000.0
+            )
+              AND (:minRatings IS NULL OR p.rating_count >= :minRatings)
         """,
         nativeQuery = true
     )
@@ -108,6 +122,9 @@ interface ProviderRepository : JpaRepository<Provider, Int> {
         @Param("lat") lat: Double,
         @Param("lon") lon: Double,
         @Param("radiusKm") radiusKm: Double,
+        @Param("sort") sort: String,
+        @Param("minRatings") minRatings: Int?,
         pageable: Pageable
     ): Page<Array<Any>>
+
 }
