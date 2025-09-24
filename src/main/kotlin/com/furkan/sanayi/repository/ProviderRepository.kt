@@ -38,6 +38,7 @@ interface ProviderRepository : JpaRepository<Provider, Int> {
          or lower(p.name) like concat(:q, '%')
          or lower(coalesce(p.address, '')) like concat(:q, '%')
       )
+      and (:minRatings is null or p.ratingCount >= :minRatings)
     """
     )
     fun search(
@@ -48,6 +49,7 @@ interface ProviderRepository : JpaRepository<Provider, Int> {
         @Param("minScore") minScore: Double?,
         @Param("maxScore") maxScore: Double?,
         @Param("q") q: String?,
+        @Param("minRatings") minRatings: Int?,
         pageable: Pageable
     ): Page<ProviderListItem>
 

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*
 class ProviderController(
     private val providerService: ProviderService
 ) {
-    @Operation(summary = "Parametrelere göre sağlayıcıları listele")
+    @Operation(summary = "Parametrelere göre sağlayıcıları listele (q, filtreler, sort)")
     @GetMapping
     fun list(
         @ParameterObject @Valid req: ProviderSearchRequest,

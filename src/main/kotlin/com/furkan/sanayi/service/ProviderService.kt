@@ -1,5 +1,6 @@
 package com.furkan.sanayi.service
 
+import com.furkan.sanayi.common.enums.SortMode
 import com.furkan.sanayi.common.exceptions.InvalidRequestException
 import com.furkan.sanayi.domain.Provider
 import com.furkan.sanayi.dto.*
@@ -11,9 +12,7 @@ import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.*
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -35,6 +34,30 @@ class ProviderService(
         val district = req.district?.trim()?.lowercase()
         val q = req.q?.trim()?.lowercase()
 
+        val effectiveMinRatings = req.minRatings ?: if (req.sort != null) 1 else null
+
+        val effectivePageable = when (req.sort) {
+            SortMode.TOP -> {
+                val s = Sort.by(
+                    Sort.Order.desc("avgScore"),
+                    Sort.Order.desc("ratingCount"),
+                    Sort.Order.desc("id")
+                )
+                PageRequest.of(page.pageNumber, page.pageSize, s)
+            }
+
+            SortMode.WORST -> {
+                val s = Sort.by(
+                    Sort.Order.asc("avgScore"),
+                    Sort.Order.desc("ratingCount"),
+                    Sort.Order.desc("id")
+                )
+                PageRequest.of(page.pageNumber, page.pageSize, s)
+            }
+
+            null -> page
+        }
+
         return providerRepo.search(
             categoryId = req.categoryId,
             city = city,
@@ -43,7 +66,8 @@ class ProviderService(
             minScore = req.minScore,
             maxScore = req.maxScore,
             q = q,
-            pageable = page
+            minRatings = effectiveMinRatings,
+            pageable = effectivePageable
         )
     }
 
