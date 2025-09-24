@@ -127,6 +127,10 @@ CREATE INDEX IF NOT EXISTS idx_ratings_provider_score_active
     ON ratings (provider_id, score)
     WHERE deleted_at IS NULL;
 
+CREATE INDEX IF NOT EXISTS idx_ratings_active_created ON ratings(created_at) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_ratings_deleted_created ON ratings(created_at) WHERE deleted_at IS NOT NULL;
+
+
 
 -- 6) Aggregate triggers for providers (rating_count, rating_sum)
 -- Note: No soft-delete column; we react to INSERT/UPDATE/DELETE only.

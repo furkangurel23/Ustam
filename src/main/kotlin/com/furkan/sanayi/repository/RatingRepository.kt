@@ -1,6 +1,7 @@
 package com.furkan.sanayi.repository
 
 import com.furkan.sanayi.domain.Rating
+import com.furkan.sanayi.dto.AdminRatingItem
 import com.furkan.sanayi.dto.RatingDto
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
+import java.time.Instant
 
 interface RatingRepository : JpaRepository<Rating, Int> {
 
@@ -90,4 +92,49 @@ interface RatingRepository : JpaRepository<Rating, Int> {
     """, nativeQuery = true
     )
     fun scoreHistogram(@Param("providerId") providerId: Int): List<Array<Any>>
+
+
+    @Query(value = """
+        select 
+            new com.furkan.sanayi.dto.AdminRatingItem(
+                r.id,
+                p.id,
+                p.name,
+                r.score,
+                r.commentText,
+                r.createdAt,
+                u.displayName,
+                r.anonymousId,
+                r.ipAddress,
+                r.deletedAt
+            )
+        from Rating r
+        join r.provider p
+        left join r.user u
+        where (:providerId is null or p.id = :providerId)
+            and (:userId is null or u.id = :userId)
+            and (:anonymousId is null or r.anonymousId = :anonymousId)
+            and (:minScore is null or r.score >= :minScore)
+            and (:maxScore is null or r.score <= :maxScore)
+            and (:q = '' or lower(r.commentText) like concat(:q, '%'))
+            and (r.createdAt >= coalesce(:from, r.createdAt))
+            and (r.createdAt <= coalesce(:to, r.createdAt))
+            and (
+                :status = 'ALL'
+                or (:status = 'ACTIVE' and r.deletedAt is null)
+                or (:status = 'DELETED' and r.deletedAt is not null)
+            )
+    """)
+    fun searchAdmin(
+        @Param("providerId") providerId: Int?,
+        @Param("userId") userId: Long?,
+        @Param("anonymousId") anonymousId: String?,
+        @Param("minScore") minScore: Short?,
+        @Param("maxScore") maxScore: Short?,
+        @Param("q") q: String?,
+        @Param("status") status: String,
+        @Param("from") from: Instant?,
+        @Param("to") to: Instant?,
+        pageable: Pageable
+    ): Page<AdminRatingItem>
 }
