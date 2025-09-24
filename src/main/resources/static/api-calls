@@ -153,3 +153,15 @@ curl -s "http://localhost:8080/api/providers?city=Ankara&q=ost&page=0&size=5" | 
 
 # 4) Kısa q (hata beklenir)
 curl -i "http://localhost:8080/api/providers?q=h"
+
+# TOP: yüksek puan, en çok oy, en yeni
+curl -s "http://localhost:8080/api/providers?sort=TOP&page=0&size=10" | jq .
+
+# WORST: düşük puanlardan başla
+curl -s "http://localhost:8080/api/providers?sort=WORST&page=0&size=10" | jq .
+
+# TOP ama minRatings=3 zorla
+curl -s "http://localhost:8080/api/providers?sort=TOP&minRatings=3&page=0&size=10" | jq .
+
+# q + sort birlikte
+curl -s "http://localhost:8080/api/providers?q=ost&sort=TOP&page=0&size=10" | jq .
