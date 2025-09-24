@@ -13,5 +13,7 @@ data class ProviderDetailDto(
     val avgScore: BigDecimal?,
     val ratingCount: Int,
     val brands: List<IdNameDto>,
-    val categories: List<IdNameDto>
+    val categories: List<IdNameDto>,
+    val recentRatings: List<RatingDto> = emptyList(),
+    val scoreHistogram: Map<Int, Long> = emptyMap()
 )

@@ -8,6 +8,7 @@ import com.furkan.sanayi.dto.*
 import com.furkan.sanayi.repository.BrandRepository
 import com.furkan.sanayi.repository.CategoryRepository
 import com.furkan.sanayi.repository.ProviderRepository
+import com.furkan.sanayi.repository.RatingRepository
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
@@ -22,7 +23,8 @@ class ProviderService(
     private val providerRepo: ProviderRepository,
     private val categoryRepo: CategoryRepository,
     private val brandRepo: BrandRepository,
-    private val geometryFactory: GeometryFactory
+    private val geometryFactory: GeometryFactory,
+    private val ratingRepo: RatingRepository
 ) {
     @Transactional(readOnly = true)
     fun listProviders(
@@ -77,6 +79,19 @@ class ProviderService(
     fun getProviderDetail(id: Int): ProviderDetailDto {
         val p = providerRepo.findWithGraphById(id) ?: throw NoSuchElementException("Usta bulunamadi: $id")
 
+        //Son 3 yorum
+        val recent = ratingRepo.findRecentByProviderId(id, PageRequest.of(0, 3))
+
+        //Histgoram (eksik bucket'lari 0 ile doldur)
+        val raw = ratingRepo.scoreHistogram(id)
+        val map = mutableMapOf<Int, Long>()
+        for (i in -5..5) map[i] = 0
+        raw.forEach { row ->
+            val score = (row[0] as Number).toInt()
+            val cnt = (row[1] as Number).toLong()
+            map[score] = cnt
+        }
+
         return ProviderDetailDto(
             id = p.id!!,
             name = p.name,
@@ -88,7 +103,9 @@ class ProviderService(
             avgScore = p.avgScore,
             ratingCount = p.ratingCount,
             brands = p.brands.map { IdNameDto(it.id!!, it.name) }.sortedBy { it.name },
-            categories = p.categories.map { IdNameDto(it.id!!, it.name) }.sortedBy { it.name }
+            categories = p.categories.map { IdNameDto(it.id!!, it.name) }.sortedBy { it.name },
+            recentRatings = recent,
+            scoreHistogram = map.toSortedMap()
         )
     }
 

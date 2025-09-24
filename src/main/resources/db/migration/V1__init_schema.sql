@@ -123,6 +123,11 @@ CREATE UNIQUE INDEX uniq_rating_anon_active
 -- Helper indexes
 CREATE INDEX IF NOT EXISTS idx_ratings_provider ON ratings (provider_id);
 
+CREATE INDEX IF NOT EXISTS idx_ratings_provider_score_active
+    ON ratings (provider_id, score)
+    WHERE deleted_at IS NULL;
+
+
 -- 6) Aggregate triggers for providers (rating_count, rating_sum)
 -- Note: No soft-delete column; we react to INSERT/UPDATE/DELETE only.
 

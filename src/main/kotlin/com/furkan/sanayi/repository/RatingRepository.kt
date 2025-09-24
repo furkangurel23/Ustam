@@ -60,4 +60,34 @@ interface RatingRepository : JpaRepository<Rating, Int> {
     @Modifying
     @Query("update Rating r set r.deletedAt = null where r.id = :id and r.deletedAt is not null")
     fun restoreById(@Param("id") id: Int): Int
+
+    @Query(
+        value = """
+        select new com.furkan.sanayi.dto.RatingDto(
+            r.id, r.score, r.commentText, r.createdAt,
+            u.displayName,
+            (case when r.anonymousId is not null then true else false end)
+        )
+        from Rating r 
+        left join r.user u
+        where r.provider.id = :providerId 
+            and r.deletedAt is null
+        order by r.createdAt desc
+    """
+    )
+    fun findRecentByProviderId(
+        @Param("providerId") providerId: Int,
+        pageable: Pageable
+    ): List<RatingDto>
+
+    @Query(
+        value = """
+        select
+            r.score as score, count(*) as cnt
+        from ratings r where r.provider_id = :providerId 
+            and r.deleted_at is null 
+        group by r.score
+    """, nativeQuery = true
+    )
+    fun scoreHistogram(@Param("providerId") providerId: Int): List<Array<Any>>
 }
