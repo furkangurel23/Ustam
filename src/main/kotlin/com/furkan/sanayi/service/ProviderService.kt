@@ -151,19 +151,30 @@ class ProviderService(
         radiusKm: Double,
         mode: NearSort?,
         minRatings: Int?,
+        maxDistanceKm: Double?,
+        limit: Int?,
         pageable: Pageable
     ): Page<ProviderNearItem> {
         if (radiusKm <= 0.0 || radiusKm > 100.0) {
             throw InvalidRequestException("radiusKm 0-100 arasında olmalıdır.")
         }
 
+        val effectiveMaxKm = maxDistanceKm?.let {
+            if(it <= 0 || it > 100) {
+                throw InvalidRequestException("maxDistanceKm 0-100 arasında olmalıdır.")
+            }
+            kotlin.math.min(it, radiusKm)
+        }
+
         val effectiveSort = mode ?: NearSort.DISTANCE
         val effectiveMinRatings = minRatings ?: if (effectiveSort != NearSort.DISTANCE) 1 else null
 
+        // Pageable: her ihtimale karşı unsorted, ayrıca limit geldiyse sayfa boyutunu override et
+        val pageSize = limit?.coerceIn(1, 500) ?: pageable.pageSize
         // !! pageable’daki sort’u sıfırla ki Spring ikinci ORDER BY eklemesin
-        val pageNoSort = PageRequest.of(pageable.pageNumber, pageable.pageSize)
+        val pageNoSort = PageRequest.of(pageable.pageNumber, pageSize)
 
-        val page = providerRepo.findNearby(lat, lon, radiusKm, effectiveSort.name, effectiveMinRatings, pageNoSort)
+        val page = providerRepo.findNearby(lat, lon, radiusKm, effectiveSort.name, effectiveMinRatings, effectiveMaxKm, pageNoSort)
         val items = page.content.map { row ->
             ProviderNearItem(
                 id = (row[0] as Number).toInt(),

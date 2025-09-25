@@ -49,8 +49,21 @@ class ProviderController(
         @RequestParam(name = "mode", required = false) mode: NearSort?,
         @Parameter(description = "Minimum oy sayısı (rating_count). TOP/WORST için default 1")
         @RequestParam(required = false) minRatings: Int?,
+        @Parameter(description = "maksimum mesafe")
+        @RequestParam maxDisctanceKm: Double?,
+        @Parameter(description = "Sonuç için limit sayısı")
+        @RequestParam limit: Int?,
         @ParameterObject pageable: Pageable
     ): Page<ProviderNearItem> =
-        providerService.nearby(lat = lat, lon = lon, radiusKm = radiusKm, mode = mode, minRatings = minRatings, pageable = pageable)
+        providerService.nearby(
+            lat = lat,
+            lon = lon,
+            radiusKm = radiusKm,
+            mode = mode,
+            minRatings = minRatings,
+            maxDistanceKm = maxDisctanceKm,
+            limit = limit,
+            pageable = pageable
+        )
 
 }
