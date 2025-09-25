@@ -165,3 +165,8 @@ curl -s "http://localhost:8080/api/providers?sort=TOP&minRatings=3&page=0&size=1
 
 # q + sort birlikte
 curl -s "http://localhost:8080/api/providers?q=ost&sort=TOP&page=0&size=10" | jq .
+
+
+TOK=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"admin@sanayi.local","password":"admin123"}' | jq -r .token)

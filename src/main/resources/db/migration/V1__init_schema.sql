@@ -127,8 +127,8 @@ CREATE INDEX IF NOT EXISTS idx_ratings_provider_score_active
     ON ratings (provider_id, score)
     WHERE deleted_at IS NULL;
 
-CREATE INDEX IF NOT EXISTS idx_ratings_active_created ON ratings(created_at) WHERE deleted_at IS NULL;
-CREATE INDEX IF NOT EXISTS idx_ratings_deleted_created ON ratings(created_at) WHERE deleted_at IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_ratings_active_created ON ratings (created_at) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_ratings_deleted_created ON ratings (created_at) WHERE deleted_at IS NOT NULL;
 
 
 
@@ -233,3 +233,24 @@ CREATE TRIGGER trg_ratings_ad
     ON ratings
     FOR EACH ROW
 EXECUTE FUNCTION ratings_after_delete();
+
+
+-- V9__moderation_logs.sql
+CREATE TABLE IF NOT EXISTS moderation_logs
+(
+    id            BIGSERIAL PRIMARY KEY,
+    action        VARCHAR(64)  NOT NULL, -- RATING_SOFT_DELETE | RATING_RESTORE ...
+    entity_type   VARCHAR(64)  NOT NULL, -- 'RATING'
+    entity_id     BIGINT       NOT NULL, -- rating id
+    provider_id   INT          NULL,     -- ilgili provider (hızlı filtre)
+    actor_user_id BIGINT       NULL,     -- admin user id
+    actor_email   VARCHAR(255) NULL,
+    reason        VARCHAR(500) NULL,
+    ip_address    INET         NULL,
+    details       JSONB        NULL,     -- serbest ek bilgi
+    created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_modlogs_entity ON moderation_logs (entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_modlogs_provider ON moderation_logs (provider_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_modlogs_created ON moderation_logs (created_at DESC);

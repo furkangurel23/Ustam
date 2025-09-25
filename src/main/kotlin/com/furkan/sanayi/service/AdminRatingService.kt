@@ -15,7 +15,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AdminRatingService(
-    private val ratingRepository: RatingRepository
+    private val ratingRepository: RatingRepository,
+    private val moderationLogService: ModerationLogService
 ) {
 
     /**
@@ -25,7 +26,7 @@ class AdminRatingService(
 
     @Transactional
     @CacheEvict(cacheNames = ["providerDetail", "providerRatings"], allEntries = true)
-    fun softDelete(ratingId: Int) {
+    fun softDelete(ratingId: Int, reason: String?, ip: String?) {
         val providerId = ratingRepository.findProviderIdByRatingId(ratingId)
             ?: throw NoSuchElementException("Rating bulunamadi: $ratingId")
 
@@ -33,11 +34,21 @@ class AdminRatingService(
         if (updated == 0) {
             throw InvalidRequestException("Zaten silinmis.")
         }
+
+        moderationLogService.logModeration(
+            action = "RATING_SOFT_DELETE",
+            ratingId = ratingId,
+            providerId = providerId,
+            entityType = "RATING",
+            reason = reason,
+            ip = ip,
+            details = mapOf("providerId" to providerId)
+        )
     }
 
     @Transactional
     @CacheEvict(cacheNames = ["providerDetail", "providerRatings"], allEntries = true)
-    fun restore(ratingId: Int) {
+    fun restore(ratingId: Int, reason: String?, ip: String?) {
         val providerId = ratingRepository.findProviderIdByRatingId(ratingId)
             ?: throw NoSuchElementException("Rating bulunamadi: $ratingId")
 
@@ -45,6 +56,16 @@ class AdminRatingService(
         if (updated == 0) {
             throw InvalidRequestException("Zaten aktif.")
         }
+
+        moderationLogService.logModeration(
+            action = "RATING_RESTORE",
+            ratingId = ratingId,
+            providerId = providerId,
+            entityType = "RATING",
+            reason = reason,
+            ip = ip,
+            details = mapOf("providerId" to providerId)
+        )
     }
 
     @Transactional(readOnly = true)
@@ -67,4 +88,5 @@ class AdminRatingService(
             pageable = effective
         )
     }
+
 }
