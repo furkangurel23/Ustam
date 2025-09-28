@@ -83,6 +83,8 @@ interface ProviderRepository : JpaRepository<Provider, Int> {
                 p.district,
                 p.avg_score AS avgScore,
                 p.rating_count AS ratingCount,
+                CAST(ST_Y(p.location) AS double precision) AS lat, 
+                CAST(ST_X(p.location) AS double precision) AS lon, 
                 ST_Distance(
                     p.location::geography,
                     ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography

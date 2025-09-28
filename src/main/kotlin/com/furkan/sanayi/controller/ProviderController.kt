@@ -50,9 +50,9 @@ class ProviderController(
         @Parameter(description = "Minimum oy sayısı (rating_count). TOP/WORST için default 1")
         @RequestParam(required = false) minRatings: Int?,
         @Parameter(description = "maksimum mesafe")
-        @RequestParam maxDisctanceKm: Double?,
+        @RequestParam(required = false) maxDistanceKm: Double?,
         @Parameter(description = "Sonuç için limit sayısı")
-        @RequestParam limit: Int?,
+        @RequestParam(required = false) limit: Int?,
         @ParameterObject pageable: Pageable
     ): Page<ProviderNearItem> =
         providerService.nearby(
@@ -61,7 +61,7 @@ class ProviderController(
             radiusKm = radiusKm,
             mode = mode,
             minRatings = minRatings,
-            maxDistanceKm = maxDisctanceKm,
+            maxDistanceKm = maxDistanceKm,
             limit = limit,
             pageable = pageable
         )

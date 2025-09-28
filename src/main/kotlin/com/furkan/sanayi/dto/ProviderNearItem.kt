@@ -7,5 +7,7 @@ data class ProviderNearItem(
     val district: String?,
     val avgScore: Double?,
     val ratingCount: Long?,
+    val lat: Double?,
+    val lon: Double?,
     val distanceKm: Double
 )

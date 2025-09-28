@@ -170,3 +170,16 @@ curl -s "http://localhost:8080/api/providers?q=ost&sort=TOP&page=0&size=10" | jq
 TOK=$(curl -s -X POST http://localhost:8080/api/auth/login \
   -H 'Content-Type: application/json' \
   -d '{"email":"admin@sanayi.local","password":"admin123"}' | jq -r .token)
+
+
+# 1) Basit mesafeye göre
+curl -s "http://localhost:8080/api/providers/near?lat=39.93&lon=32.85&radiusKm=10&page=0&size=5" \
+ | jq '.content[0]'
+
+# 2) TOP modunda, 3 km içinde, minRatings=1, limit=10
+curl -s "http://localhost:8080/api/providers/near?lat=39.93&lon=32.85&radiusKm=10&mode=TOP&minRatings=1&maxDistanceKm=3&limit=10&page=0&size=10" \
+ | jq '.content | length'
+
+# 3) Lat/Lon döndüğünü doğrula
+curl -s "http://localhost:8080/api/providers/near?lat=39.93&lon=32.85&radiusKm=10&page=0&size=3" \
+ | jq '.content[] | {id,lat,lon,distanceKm}'
