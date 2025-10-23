@@ -9,6 +9,7 @@ import com.furkan.sanayi.dto.RatingRequest
 import com.furkan.sanayi.repository.RatingRepository
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.cache.annotation.Caching
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -27,7 +28,12 @@ class RatingService(
     fun listRatings(providerId: Int, pageable: Pageable): Page<RatingDto> =
         ratingRepo.findAllByProviderId(providerId, pageable)
 
-    @CacheEvict(cacheNames = ["providerRatings", "providerDetail"], allEntries = true)
+    @Caching(
+        evict = [
+            CacheEvict(cacheNames = ["providerRatings"], allEntries = true),
+            CacheEvict(cacheNames = ["providerDetail"], key = "#req.providerId")
+        ]
+    )
     @Transactional
     fun addRating(req: RatingRequest): IdResponse {
         req.ensureIdentityValid()

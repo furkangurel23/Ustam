@@ -5,8 +5,8 @@ app:
   cors:
     origins: http://localhost:3000,https://sanayi.dev
   recaptcha:
-    enabled: false
-    secret: "${RECAPTCHA_SECRET}"
+    enabled: true
+    secret: 6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe
   ratelimit:
     enabled: true
     perMinute: 30
